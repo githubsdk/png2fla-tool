@@ -16,24 +16,36 @@ package
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			stage.color = 0x0099ff;
-			var bmd:BitmapData = new Test();
+
+			testBitmapData();
+			
+			//executeScript();
+		}
+		
+		protected function getBitmapDataValidRect(bmd:BitmapData):Rectangle
+		{
+			var rect:Rectangle;
+			if(bmd!=null)
+			{
+				rect = bmd.getColorBoundsRect(0xff000000,0xff000000, true);
+			}else
+			{
+				rect = new Rectangle();
+			}
+			return rect;
+		}
+		
+		protected function testBitmapData():void
+		{
+			var bmd:BitmapData = new Test()//new BitmapData(100,100,true,0x00ffffff);
+			bmd.fillRect( new Rectangle(20,20,60,60), 0xffffff00);
 			var bmp:Bitmap = new Bitmap(bmd, PixelSnapping.AUTO, true);
 			addChild(bmp);
-			var rect:Rectangle = bmd.getColorBoundsRect(0xff000000,0xff000000, true);
-			//rect = bmd.getColorBoundsRect(0xff000000, 0x00000000,true);
+			var rect:Rectangle = getBitmapDataValidRect(bmd);
 			trace(rect, bmp.getRect(this));
 			graphics.beginFill(0xff00ff);
 			graphics.drawRect(rect.x, rect.y, rect.width, rect.height);
 			graphics.endFill();
-			
-			return;
-			rect = bmd.getColorBoundsRect(0xff000000, 0x00000000);
-			graphics.beginFill(0xff0000);
-			graphics.drawRect(rect.x, rect.y, rect.width, rect.height);
-			graphics.endFill();
-			
-			trace(rect);
-			//executeScript();
 		}
 		
 		protected function executeScript():void
