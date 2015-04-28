@@ -37,7 +37,7 @@
 	<!-- <description></description> -->
 
 	<!-- Copyright information. Optional -->
-	<!-- <copyright></copyright> -->
+	<copyright>Vector.Lee@Shinezone</copyright>
 
 	<!-- Publisher ID. Used if you're updating an application created prior to 1.5.3 -->
 	<!-- <publisherID></publisherID> -->
@@ -151,7 +151,7 @@
 		<image1024x1024></image1024x1024>
 	</icon> -->
 	<icon>
-		<image100x100>assets/icon.png</image100x100>
+		<image128x128>assets/icon.png</image128x128>
 	</icon>
 
 	<!-- Whether the application handles the update when a user double-clicks an update version
@@ -188,9 +188,14 @@
 				<image48x48></image48x48>
 				<image128x128></image128x128>
 			</icon> -->
-			
-		<!-- </fileType> -->
-	<!-- </fileTypes> -->
+		
+<!-- 	 <fileTypes> -->
+<!-- 	 	<fileType> -->
+<!-- 			<icon> -->
+<!-- 				<image128x128>assets/icon.png</image128x128> -->
+<!-- 			</icon> -->
+<!-- 		</fileType> -->
+<!-- 	</fileTypes> -->
 
     <!-- iOS specific capabilities -->
 	<!-- <iPhone> -->

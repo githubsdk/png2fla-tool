@@ -45,8 +45,11 @@
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="/Users/Vector/work_shinezone/png2fla-tool/shinezone.p12" airTimestamp="true" anePathSet="true" version="1">
-        <airExcludes/>
+      <airSettings airCertificatePath="C:/Users/Administrator/Desktop/shinezone.p12" airTimestamp="true" anePathSet="true" version="1">
+        <airExcludes>
+          <pathEntry path="assets/test.fla"/>
+          <pathEntry path="assets/flash_cs5_extending_jsfl.pdf"/>
+        </airExcludes>
         <anePaths/>
         <newLaunchParams/>
         <modifiedLaunchParams/>
