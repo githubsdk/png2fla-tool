@@ -2,6 +2,8 @@ package
 {
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
+	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
 	import flash.display.PixelSnapping;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -14,6 +16,11 @@ package
 	import flash.text.TextFormat;
 	
 	import debugger.Debugger;
+	
+	import fl.controls.Label;
+	import fl.controls.TextArea;
+	import fl.core.UIComponent;
+	import fl.events.SliderEvent;
 	
 	public class Png2Fla extends Sprite
 	{
@@ -40,9 +47,15 @@ package
 			
 			_panel.uiloader.source = bmp;
 			
-			var fmt:TextFormat = new TextFormat(null, 20);
-			
+			setAllTextSize(_panel, _panel.font_size.value);
+			_panel.font_size.addEventListener(SliderEvent.CHANGE, onSliderHandler);
 			updateState();
+		}
+		
+		protected function onSliderHandler(event:SliderEvent):void
+		{
+			Debugger.log(_panel.font_size.minimum, _panel.font_size.maximum, _panel.font_size.value);
+			setAllTextSize(_panel, _panel.font_size.value);
 		}
 		
 		protected function onMouseClick(event:MouseEvent):void
@@ -235,13 +248,36 @@ package
 		
 		protected function log(content:String, color:String=null):void
 		{
-			content = "△"+content;
+			content = "["+ (new Date()).toTimeString() +"] "+content;
 			if(color!=null)
 			{
 				content = "<font color='#"+color+"'>"+ content+"</font>"
 			}
 			_panel.log.htmlText+=content;
+			_panel.log.verticalScrollPosition = _panel.log.maxVerticalScrollPosition;
 			//_panel.log.appendText(content);
 		}
+		
+		
+		private function setAllTextSize(container:DisplayObjectContainer, value:uint):void
+		{
+			if(container==null)
+				return;
+			var count:uint = container.numChildren;
+			var index:uint = 0;
+			while(index<count)
+			{
+				var child:DisplayObject = container.getChildAt(index);
+				if(child is TextArea || child is Label)
+				{
+					UIComponent(child).setStyle("textFormat", new TextFormat("_sans", value));
+				}else if(child is DisplayObjectContainer)
+				{
+					setAllTextSize(child as DisplayObjectContainer, value);
+				}
+				index++;
+			}
+		}
+		
 	}
 }
