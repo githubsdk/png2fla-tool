@@ -4,6 +4,7 @@ package
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.Loader;
 	import flash.display.PixelSnapping;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -13,6 +14,7 @@ package
 	import flash.events.MouseEvent;
 	import flash.filesystem.File;
 	import flash.geom.Rectangle;
+	import flash.net.URLRequest;
 	import flash.text.TextFormat;
 	
 	import debugger.Debugger;
@@ -27,6 +29,8 @@ package
 		protected var _panel:PanelSkin;
 		protected var _workingPath:File;
 		protected var _bCopying:Boolean;
+		protected var _loader:Loader;
+		protected var _executeCount:uint;
 		
 		protected const CONFIG:String = "import_config.txt";
 		
@@ -42,10 +46,8 @@ package
 			_panel.copy_progress.minimum = 0;
 			_panel.copy_progress.maximum = 1;
 			
-			var bmd:BitmapData = new Test()//new BitmapData(100,100,true,0x00ffffff);
-			var bmp:Bitmap = new Bitmap(bmd, PixelSnapping.AUTO, true);
-			
-			_panel.uiloader.source = bmp;
+			var cfg:String = '{"x":"10","y":"200"}';
+			var o:Object = JSON.parse(cfg);
 			
 			setAllTextSize(_panel, _panel.font_size.value);
 			_panel.font_size.addEventListener(SliderEvent.CHANGE, onSliderHandler);
@@ -74,7 +76,7 @@ package
 				}
 				case _panel.copy_config:
 				{
-					var source:File = File.applicationDirectory.resolvePath("templete/config.txt");
+					var source:File = File.applicationDirectory.resolvePath("templete/"+CONFIG);
 					copyConfig(source, CONFIG, _workingPath.getDirectoryListing());
 					break;
 				}
@@ -86,7 +88,20 @@ package
 			if(_workingPath==null)
 				return;
 			log("========开始导图","00ff00");
+			
+			if(_loader==null)
+			{
+				_loader = new Loader();
+				_panel.uiloader.source = _loader;
+			}
+			_panel.start.enabled = false;
 			var children:Array = _workingPath.getDirectoryListing();
+			
+			_executeCount = 0;
+			parseImages(children);
+			log("本次处理文件数："+_executeCount);
+			_panel.start.enabled = true;
+			return;
 			for each(var child:File in children)
 			{
 				if(child.isDirectory==false)
@@ -117,9 +132,34 @@ package
 			}
 		}
 		
-		protected function checkFile():Boolean
+		protected function parseImages(children:Array):void
 		{
-			return false;
+			if(children==null || children.length==0)
+				return;
+			var child:File = children.shift();
+			if(child==null)
+				return;
+			if(child.isDirectory==true)
+				parseImages(child.getDirectoryListing());
+			else
+			{
+				if(_panel.png.selected==true && child.extension==_panel.png.label)
+				{
+					_executeCount++;
+					Debugger.log(child.extension, child.name);
+					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
+					_loader.load(new URLRequest(child.url));
+				}
+			}
+			parseImages(children);
+			
+			function onLoaderHandler(event:Event):void
+			{
+				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
+				_loader.unload();
+				parseImages(children);
+				log(child.name+" 完成。");
+			}
 		}
 		
 		/**
@@ -134,6 +174,8 @@ package
 			if(children==null || children.length==0)
 				return;
 			var child:File = children.shift();
+			if(child==null)
+				return;
 			var dest:File = child.resolvePath(destPath);
 			if(child.isDirectory==true)
 			{
