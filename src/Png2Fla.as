@@ -1,5 +1,7 @@
 package
 {
+	import flash.desktop.Clipboard;
+	import flash.desktop.ClipboardFormats;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -165,8 +167,27 @@ package
 		protected function onAllImagesDone(...args):void
 		{
 			updateState();
-			saveContent(_workingPath.resolvePath(IMAGE_POS_FILE), _imagePos);
+			var file:File = _workingPath.parent;
+			saveContent(file.resolvePath(IMAGE_POS_FILE), _imagePos);
+			//System.setClipboard(_imagePos);
+			Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, _imagePos);
 			_imagePos = null;
+			if(_panel.uiloader.contains(_bmp)==true)
+			{
+				_bmp.parent.removeChild(_bmp);
+				_bmp.bitmapData.dispose();
+			}
+			file = File.applicationDirectory.resolvePath("templete/auto_export.jsfl");
+			var save_path:String = _workingPath.nativePath;
+			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			var jsfl:File = new File(save_path);
+			copyConfig(file, "auto_export.jsfl",[ jsfl], callback);
+			function callback():void
+			{
+				
+				jsfl = jsfl.resolvePath("auto_export.jsfl");
+				jsfl.openWithDefaultApplication();
+			}
 		}
 		
 		protected function executeAllImage(images:Vector.<File>, onDone:Function):void
@@ -297,10 +318,14 @@ package
 		 * @param childrens
 		 * 
 		 */		
-		protected function copyConfig(source:File, destPath:String, children:Array):void
+		protected function copyConfig(source:File, destPath:String, children:Array, callBack:Function=null):void
 		{
 			if(children==null || children.length==0)
+			{
+				if(callBack!=null)
+					callBack();
 				return;
+			}
 			var child:File = children.pop();
 			if(child==null)
 				return;
@@ -313,14 +338,14 @@ package
 				source.addEventListener(IOErrorEvent.IO_ERROR, onCopyHandler);
 			}else{
 				Debugger.log(child.name);
-				copyConfig(source, destPath, children);
+				copyConfig(source, destPath, children,callBack);
 			}
 			
 			function onCopyHandler(e:Event):void
 			{
 				source.removeEventListener(Event.COMPLETE, onCopyHandler);
 				source.removeEventListener(IOErrorEvent.IO_ERROR, onCopyHandler);
-				copyConfig(source, destPath, children);
+				copyConfig(source, destPath, children,callBack);
 				switch(e.type)
 				{
 					case IOErrorEvent.IO_ERROR:
@@ -330,7 +355,7 @@ package
 					}
 					case Event.COMPLETE:
 					{
-						log("文件复制完成:"+child.nativePath+"","00ff00");
+						log("文件复制完成:"+child.nativePath+"");
 						break;
 					}
 				}
@@ -412,11 +437,10 @@ package
 			graphics.endFill();
 		}
 		
-		protected function executeScript():void
+		//"assets/icon.png"
+		protected function openWithDefaultApplication(fileName:String="assets/icon.png"):void
 		{
-			var path:String = "assets/export_feed_png.jsfl";
-			path = "assets/icon.png"
-			var file:File = File.applicationDirectory.resolvePath(path);
+			var file:File = File.applicationDirectory.resolvePath(fileName);
 			trace(file.url);
 			file.openWithDefaultApplication();
 		}
