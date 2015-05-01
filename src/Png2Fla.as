@@ -50,6 +50,8 @@ package
 		
 		protected const TOOL_DATA_FILE:String = "png2fla_saved.txt";
 		
+		protected const JSFL_FILE:String = "auto_export.jsfl";
+		
 		protected var _bmd:BitmapData;
 		protected var _imagePos:String;
 		
@@ -177,15 +179,15 @@ package
 				_bmp.parent.removeChild(_bmp);
 				_bmp.bitmapData.dispose();
 			}
-			file = File.applicationDirectory.resolvePath("templete/auto_export.jsfl");
+			file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
 			var save_path:String = _workingPath.nativePath;
 			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
 			var jsfl:File = new File(save_path);
-			copyConfig(file, "auto_export.jsfl",[ jsfl], callback);
+			copyConfig(file, JSFL_FILE,[ jsfl], callback);
 			function callback():void
 			{
 				
-				jsfl = jsfl.resolvePath("auto_export.jsfl");
+				jsfl = jsfl.resolvePath(JSFL_FILE);
 				jsfl.openWithDefaultApplication();
 			}
 		}
