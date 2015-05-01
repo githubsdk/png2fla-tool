@@ -5,6 +5,7 @@ package
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Loader;
+	import flash.display.PNGEncoderOptions;
 	import flash.display.PixelSnapping;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -13,9 +14,13 @@ package
 	import flash.events.IOErrorEvent;
 	import flash.events.MouseEvent;
 	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
+	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import flash.net.URLRequest;
 	import flash.text.TextFormat;
+	import flash.utils.ByteArray;
 	
 	import debugger.Debugger;
 	
@@ -31,8 +36,29 @@ package
 		protected var _bCopying:Boolean;
 		protected var _loader:Loader;
 		protected var _executeCount:uint;
+		protected var _allFiles:Vector.<File>;
+		protected var _bmp:Bitmap;
 		
 		protected const CONFIG:String = "import_config.txt";
+		protected var _fileStream:FileStream;
+		/**
+		 * 工具自身数据保存位置
+		 */		
+		protected const TOOL_DATA_SAVE:File = File.applicationStorageDirectory;
+		
+		protected const TOOL_DATA_FILE:String = "png2fla_saved.txt";
+		
+		protected var _bmd:BitmapData;
+		protected var _imagePos:String;
+		
+		/**
+		 *新的图像保存位置 
+		 */		
+		protected const IMAGE_SAVED_FOLDER:String = "copy";
+		/**
+		 *新的图像偏移量保存文件 
+		 */		
+		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/image_pos.txt";
 		
 		public function Png2Fla()
 		{
@@ -48,6 +74,13 @@ package
 			
 			var cfg:String = '{"x":"10","y":"200"}';
 			var o:Object = JSON.parse(cfg);
+			
+			var last_path:String = readLastPath(TOOL_DATA_FILE);
+			if(last_path!=null)
+			{
+				_workingPath = new File(last_path);
+				log("已设置工作目录！");
+			}
 			
 			setAllTextSize(_panel, _panel.font_size.value);
 			_panel.font_size.addEventListener(SliderEvent.CHANGE, onSliderHandler);
@@ -92,17 +125,30 @@ package
 			if(_loader==null)
 			{
 				_loader = new Loader();
-				_panel.uiloader.source = _loader;
+				//_panel.uiloader.source = _loader;
 			}
+			_imagePos = null;
+			_imagePos = "";
+
 			_panel.start.enabled = false;
 			var children:Array = _workingPath.getDirectoryListing();
 			
 			_executeCount = 0;
-			parseImages(children);
+			_allFiles ||= new Vector.<File>;
+			_allFiles.length = 0;
+			_bmp = new Bitmap();
+			addChild(_bmp);
+			var extentions:Array = new Array();
+			if(_panel.png.selected==true)
+				extentions.push(_panel.png.label);
+			if(_panel.jpg.selected==true)
+				extentions.push(_panel.jpg.label);
+			fildAllImages(children,extentions);
 			log("本次处理文件数："+_executeCount);
-			_panel.start.enabled = true;
+			extentions = null;
+			executeAllImage(_allFiles, onAllImagesDone);
 			return;
-			for each(var child:File in children)
+			/*for each(var child:File in children)
 			{
 				if(child.isDirectory==false)
 					continue;
@@ -113,14 +159,126 @@ package
 				}else{
 					log("该目录下不存在必要的配置文件，请检查："+child.nativePath,"ff0000");
 				}
+			}*/
+		}
+		
+		protected function onAllImagesDone(...args):void
+		{
+			updateState();
+			saveContent(_workingPath.resolvePath(IMAGE_POS_FILE), _imagePos);
+			_imagePos = null;
+		}
+		
+		protected function executeAllImage(images:Vector.<File>, onDone:Function):void
+		{
+			if(images==null || images.length==0)
+			{
+				if(onDone!=null)
+					onDone.apply(null, null);
+				return;
 			}
+			var child:File = images.pop();
+			Debugger.log(child.extension, child.name);
+			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
+			_loader.load(new URLRequest(child.url));
+			
+			function onLoaderHandler(event:Event):void
+			{
+				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
+				var bmp:Bitmap = _loader.content as Bitmap;
+				
+				executeImageAndSave(bmp.bitmapData, child, 136.4, 186.4);
+				//addChild(_bmp);
+				//_panel.uiloader.source = _bmp;
+				_loader.unloadAndStop(true);
+				_loader.unload();
+				executeAllImage(images, onDone);
+				log(child.name+" 完成。");
+			}
+		}
+		
+		/**
+		 *剔除图像无效透明像素并保存 
+		 * @param source
+		 * @param image
+		 * @param shiftX
+		 * @param shiftY
+		 * 
+		 */		
+		protected function executeImageAndSave(source:BitmapData, image:File, shiftX:Number, shiftY:Number):void
+		{
+			if(source==null)
+				return;
+			var rect:Rectangle = getBitmapDataValidRect(source);
+			shiftX = shiftX - rect.x;
+			shiftY = shiftY - rect.y;
+			
+			var dest:BitmapData = new BitmapData(rect.width, rect.height);
+			dest.copyPixels(source, rect, new Point(0,0));
+			if(_bmp.bitmapData!=null)
+			{
+				_bmp.bitmapData.dispose();
+			}
+			_bmp.bitmapData = dest;
+			_bmp.x = -shiftX; 
+			_bmp.y = -shiftY;
+
+			//保存处理过的图像
+			var save_path:String = image.nativePath;
+			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			var ba:ByteArray = new ByteArray();
+			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
+			saveContent(new File(save_path), ba, true);
+			ba = null;
+			
+			//图像偏移量加入字符串
+			_imagePos = _imagePos+image.nativePath+":"+shiftX+"|"+shiftY+";\n";
+			
+			//预览
+			if(_panel.uiloader.contains(_bmp)==true)
+			{
+				_bmp.parent.removeChild(_bmp);
+			}
+			_panel.uiloader.addChild(_bmp);
+			_panel.uiloader.graphics.clear();
+			_panel.uiloader.graphics.beginFill(0, 0.2);
+			_panel.uiloader.graphics.drawRect(-shiftX, -shiftY, rect.width, rect.height);
+			_panel.uiloader.graphics.endFill();
+		}
+		
+		/**
+		 *找出所有图像 
+		 * @param children
+		 * 
+		 */		
+		protected function fildAllImages(children:Array,extensions:Array):void
+		{
+			if(children==null || children.length==0)
+				return;
+			var child:File = children.pop();
+			if(child==null)
+				return;
+			if(child.isDirectory==true)
+			{
+				Debugger.log(child.extension, child.name);
+				fildAllImages(child.getDirectoryListing(),extensions);
+			}
+			else
+			{
+				if(extensions!=null &&extensions.indexOf( child.extension)>=0)
+				{
+					_executeCount++;
+					_allFiles.push(child);
+				}
+			}
+			fildAllImages(children,extensions);
 		}
 		
 		protected function executeAllFolders(children:Array):void
 		{
 			if(children==null || children.length==0)
 				return;
-			var child:File = children.shift();
+			var child:File = children.pop();
 			if(child.isDirectory==false)
 				return;
 			var cfg:File = child.resolvePath(CONFIG);
@@ -129,36 +287,6 @@ package
 				Debugger.log(child.url);
 			}else{
 				log("该目录下不存在必要的配置文件，请检查："+child.nativePath,"ff0000");
-			}
-		}
-		
-		protected function parseImages(children:Array):void
-		{
-			if(children==null || children.length==0)
-				return;
-			var child:File = children.shift();
-			if(child==null)
-				return;
-			if(child.isDirectory==true)
-				parseImages(child.getDirectoryListing());
-			else
-			{
-				if(_panel.png.selected==true && child.extension==_panel.png.label)
-				{
-					_executeCount++;
-					Debugger.log(child.extension, child.name);
-					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
-					_loader.load(new URLRequest(child.url));
-				}
-			}
-			parseImages(children);
-			
-			function onLoaderHandler(event:Event):void
-			{
-				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
-				_loader.unload();
-				parseImages(children);
-				log(child.name+" 完成。");
 			}
 		}
 		
@@ -173,7 +301,7 @@ package
 		{
 			if(children==null || children.length==0)
 				return;
-			var child:File = children.shift();
+			var child:File = children.pop();
 			if(child==null)
 				return;
 			var dest:File = child.resolvePath(destPath);
@@ -213,7 +341,7 @@ package
 		{
 			_panel.copy_config.enabled = _workingPath!=null ;//_panel.copy_progress.value==_panel.copy_progress.maximum 
 			_panel.override_copy.enabled = _workingPath!=null;
-			_panel.start.enabled = _workingPath!=null;
+			_panel.start.enabled = _workingPath!=null && (_allFiles==null || _allFiles.length==0);
 			_panel.current_path.text = _workingPath==null ? "请选择工作目录":_workingPath.nativePath;
 		}
 	
@@ -248,6 +376,11 @@ package
 					_workingPath = null;
 					break;
 				}
+				case Event.SELECT:
+				{
+					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), '{"path":"'+_workingPath.url+'"}');
+					break;
+				}
 			}
 			updateState();
 			Debugger.log(_workingPath==null ? "unselected" : _workingPath.nativePath);
@@ -258,7 +391,7 @@ package
 			var rect:Rectangle;
 			if(bmd!=null)
 			{
-				rect = bmd.getColorBoundsRect(0xff000000,0xff000000, true);
+				rect = bmd.getColorBoundsRect(0xff000000,0x00000000, false);
 			}else
 			{
 				rect = new Rectangle();
@@ -298,6 +431,52 @@ package
 			_panel.log.htmlText+=content;
 			_panel.log.verticalScrollPosition = _panel.log.maxVerticalScrollPosition;
 			//_panel.log.appendText(content);
+		}
+		
+		/**
+		 *保存上次工作目录 
+		 * @param fileName
+		 * @param content
+		 * 
+		 */		
+		private function saveContent(file:File,content:Object,bytes:Boolean=false):void
+		{
+			if(file==null || content==null)
+				return;
+			_fileStream ||= new FileStream();
+			_fileStream.open(file, FileMode.WRITE);
+			if(bytes==true)
+				_fileStream.writeBytes(ByteArray(content));
+			else
+				_fileStream.writeUTFBytes(String(content));
+			_fileStream.close();
+		}
+		
+		private function readLastPath(fileName:String):String
+		{
+			var path:String = null;
+			_fileStream = new FileStream();
+			try
+			{
+				_fileStream.open(TOOL_DATA_SAVE.resolvePath(fileName), FileMode.READ);
+				if(_fileStream.bytesAvailable>0)
+				{
+					path = _fileStream.readUTFBytes(_fileStream.bytesAvailable);
+					
+				}
+				_fileStream.close();
+			} 
+			catch(error:Error) 
+			{
+				
+			}
+			if(path!=null)
+			{
+				var json:Object = JSON.parse(path);
+				path = json.path;
+			}
+			
+			return path;
 		}
 		
 		

@@ -1,4 +1,7 @@
 {
-	"x"=100,
-	"y"=120,
+	"x"="100",
+	"y"="120",
+	"commonframe"="2",
+	"grave"="1",
+	"ignore"="speciall,test,other,",
 }
