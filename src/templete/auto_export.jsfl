@@ -91,34 +91,37 @@ function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInte
 		var old_frames = timeline.frameCount;
 		//新的原件有一个空帧，所以要减去一
 		var start_index = old_frames==1 ? old_frames-1 : old_frames;
-		timeline.currentLayer = 0;
+		
+		
+		timeline.setSelectedLayers(1);
+		//timeline.setSelectedFrames(start_index,start_index,true);
+		trace(old_frames);
 		var dest_index = start_index+add_frames-1;
-		
-		
+		if(start_index==0)
+			dest_index += 1;
 		timeline.insertBlankKeyframe(dest_index);
-		if(start_index!=0)
-			timeline.convertToKeyframes(start_index);
-		//timeline.setSelectedFrames([start_index]);
-		timeline.setFrameProperty("name", startLabel, start_index);
-		//timeline.setSelectedFrames([dest_index]);
-		timeline.setFrameProperty("name", endLabel, dest_index);
-		
-		timeline.currentLayer = 1;
-		var dest_index = start_index+add_frames-1;
-		
-		timeline.insertKeyframe(dest_index);
-		if(start_index!=0)
-			timeline.insertBlankKeyframe(start_index);
+		//timeline.removeFrames(dest_index);
 		trace("---");
+		trace(add_frames);
 		trace(start_index);
 		trace(dest_index);
 		timeline.setSelectedFrames(start_index,start_index,true);
-		trace("---1");
-		var ix = 100;
-		var iy = 100;
 		
+		LIB.addItemToDocument({x:0, y:0},"attack/downleft/"+itemNames[i]);
+		//我也不知道为什么上边的坐标设置有问题，所以这里只好重新设置
+		var selected = DOM.selection[0];
+		selected.x = 100;
+		selected.y = 100;
 		
-		LIB.addItemToDocument({x:ix, y:iy}, "attack/downleft/"+itemNames[i]);
+		var dest_index = start_index+add_frames-1;	
+		timeline.setSelectedLayers(0);
+		//timeline.setSelectedFrames(start_index,start_index,true);
+		timeline.insertBlankKeyframe(dest_index);
+		if(start_index!=0)
+			timeline.convertToKeyframes(start_index);
+		
+		timeline.setFrameProperty("name", startLabel, start_index);
+		timeline.setFrameProperty("name", endLabel, dest_index);
 	}
 }
 
