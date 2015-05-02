@@ -25,7 +25,7 @@
 		下面的示例将项目 Symbol_1 移动到库文件夹 new，然后替换该文件夹中的同名项目： 
 			fl.getDocumentDOM().library.moveToFolder("new", "Symbol_1", true); 
 
-	-按顺序添加到舞台并添加label -
+	-按顺序添加到舞台并添加label √
 		下面的示例将位于库中 folder1 内的项目 Symbol1 添加到舞台的 (550, 485) 位置： 
 			fl.getDocumentDOM().library.addItemToDocument({x:550.0, y:485.0}, "folder1/Symbol1"); 
 

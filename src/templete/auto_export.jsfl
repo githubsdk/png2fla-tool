@@ -72,8 +72,8 @@ function init()
 	"file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0002.png"];
 	importFiles(uirList,folder);
 	
-	for(var i=0; i < 2; ++i)
-		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",3);
+	for(var i=0; i < 5; ++i)
+		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",5);
 }
 
 function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInterval)
@@ -85,43 +85,51 @@ function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInte
 	var timeline = items[0].timeline;
 	
 	var add_frames = items_count * frameInterval;
-
+	var frame_count = timeline.frameCount;
+	
+	//新的原件有一个空帧，所以要减去一
+	var start_index = frame_count==1 ? frame_count-1 : frame_count;
+	var dest_index = start_index + add_frames - 1;
+	timeline.currentLayer=0;
+	
+	timeline.insertBlankKeyframe(dest_index);
+	if(start_index!=0)
+		timeline.convertToKeyframes(start_index);
+		
+	timeline.setFrameProperty("name", startLabel, start_index);
+	timeline.setFrameProperty("name", endLabel, dest_index);
+	
+	timeline.currentLayer = 1;
+	//timeline.currentFrame = start_index;
+	timeline.insertFrames(start_index==0 ? add_frames-1:add_frames, false, start_index);
+	if(start_index!=0)
+		timeline.convertToBlankKeyframes(start_index);
+	var add_index_start = start_index;
 	for(var i=0;i<items_count;++i)
-	{
-		var old_frames = timeline.frameCount;
-		//新的原件有一个空帧，所以要减去一
-		var start_index = old_frames==1 ? old_frames-1 : old_frames;
-		
-		
-		timeline.setSelectedLayers(1);
-		//timeline.setSelectedFrames(start_index,start_index,true);
-		trace(old_frames);
-		var dest_index = start_index+add_frames-1;
-		if(start_index==0)
-			dest_index += 1;
-		timeline.insertBlankKeyframe(dest_index);
-		//timeline.removeFrames(dest_index);
-		trace("---");
-		trace(add_frames);
-		trace(start_index);
-		trace(dest_index);
-		timeline.setSelectedFrames(start_index,start_index,true);
+	{		
+		//选择起始帧
+		trace("---")
+		trace(add_index_start)
+		timeline.currentFrame = add_index_start;
+		if(i!=0)
+			timeline.convertToBlankKeyframes(add_index_start);
 		
 		LIB.addItemToDocument({x:0, y:0},"attack/downleft/"+itemNames[i]);
 		//我也不知道为什么上边的坐标设置有问题，所以这里只好重新设置
 		var selected = DOM.selection[0];
 		selected.x = 100;
 		selected.y = 100;
-		
-		var dest_index = start_index+add_frames-1;	
-		timeline.setSelectedLayers(0);
-		//timeline.setSelectedFrames(start_index,start_index,true);
+		add_index_start+=frameInterval;
+		continue;
+		var dest_index = start_index+add_frames-1;
+		if(start_index==0)
+			dest_index += 1;
 		timeline.insertBlankKeyframe(dest_index);
-		if(start_index!=0)
-			timeline.convertToKeyframes(start_index);
+		//timeline.removeFrames(dest_index);
+
 		
-		timeline.setFrameProperty("name", startLabel, start_index);
-		timeline.setFrameProperty("name", endLabel, dest_index);
+		
+		
 	}
 }
 
