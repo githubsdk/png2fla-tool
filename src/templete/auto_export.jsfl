@@ -74,6 +74,15 @@ function init()
 	
 	for(var i=0; i < 5; ++i)
 		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",5);
+		
+	saveFlaAndPublish(SCRIPT_PATH+"savefile.fla");
+}
+
+function saveFlaAndPublish(savePath)
+{
+	fl.saveDocument(DOM , savePath);
+	DOM.publish();
+	fl.closeDocument(DOM);
 }
 
 function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInterval)

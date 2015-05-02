@@ -179,6 +179,11 @@ package
 				_bmp.parent.removeChild(_bmp);
 				_bmp.bitmapData.dispose();
 			}
+			return;
+			executeJSFL();
+			
+			return;
+			//以下将jsfl拷贝到工作目录的代码不需要了
 			file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
 			var save_path:String = _workingPath.nativePath;
 			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
@@ -190,6 +195,12 @@ package
 				jsfl = jsfl.resolvePath(JSFL_FILE);
 				jsfl.openWithDefaultApplication();
 			}
+		}
+		
+		protected function executeJSFL():void
+		{
+			var file:File = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
+			file.openWithDefaultApplication();
 		}
 		
 		protected function executeAllImage(images:Vector.<File>, onDone:Function):void
@@ -235,7 +246,8 @@ package
 			var rect:Rectangle = getBitmapDataValidRect(source);
 			shiftX = shiftX - rect.x;
 			shiftY = shiftY - rect.y;
-			
+			if(shiftX<0)
+				Debugger.log(shiftX);
 			var dest:BitmapData = new BitmapData(rect.width, rect.height);
 			dest.copyPixels(source, rect, new Point(0,0));
 			if(_bmp.bitmapData!=null)
