@@ -40,7 +40,146 @@ var SCRIPT_PATH = currentScriptPath();
 
 var POS = FLfile.read(SCRIPT_PATH+"image_pos.txt");
 
-openTempleteFLA();
+var DOM ;
+
+var LIB; 
+
+init();
+
+function init()
+{
+	fl.outputPanel.clear();
+	openTempleteFLA();
+	
+	DOM = fl.getDocumentDOM();
+	LIB = DOM.library;
+	
+	var item_name = "role";
+	var item = createItem(item_name, "Role","movie clip");
+	
+	var editable = LIB.editItem(item_name);
+	
+	if(item!=null && editable==true)
+	{
+		//默认参数，先添加在上边的图层
+		item.timeline.addNewLayer("res");
+		item.timeline.addNewLayer("label");
+		item.timeline.deleteLayer(2);
+	}
+	var folder = "attack/downleft";
+	createFolder(folder);
+	var uirList = ["file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0001.png",
+	"file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0002.png"];
+	importFiles(uirList,folder);
+	
+	for(var i=0; i < 2; ++i)
+		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",3);
+}
+
+function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInterval)
+{
+	var editable = LIB.editItem(itemName);
+	var r = LIB.selectItem(itemName);
+	var items = LIB.getSelectedItems();
+	var items_count = itemNames.length;
+	var timeline = items[0].timeline;
+	
+	var add_frames = items_count * frameInterval;
+
+	for(var i=0;i<items_count;++i)
+	{
+		var old_frames = timeline.frameCount;
+		//新的原件有一个空帧，所以要减去一
+		var start_index = old_frames==1 ? old_frames-1 : old_frames;
+		timeline.currentLayer = 0;
+		var dest_index = start_index+add_frames-1;
+		
+		
+		timeline.insertBlankKeyframe(dest_index);
+		if(start_index!=0)
+			timeline.convertToKeyframes(start_index);
+		//timeline.setSelectedFrames([start_index]);
+		timeline.setFrameProperty("name", startLabel, start_index);
+		//timeline.setSelectedFrames([dest_index]);
+		timeline.setFrameProperty("name", endLabel, dest_index);
+		
+		timeline.currentLayer = 1;
+		var dest_index = start_index+add_frames-1;
+		
+		timeline.insertKeyframe(dest_index);
+		if(start_index!=0)
+			timeline.insertBlankKeyframe(start_index);
+		trace("---");
+		trace(start_index);
+		trace(dest_index);
+		timeline.setSelectedFrames(start_index,start_index,true);
+		trace("---1");
+		var ix = 100;
+		var iy = 100;
+		
+		
+		LIB.addItemToDocument({x:ix, y:iy}, "attack/downleft/"+itemNames[i]);
+	}
+}
+
+/** 创建一个顶级文件夹*/
+function createFolder(folder)
+{
+	LIB.selectNone();
+	LIB.newFolder(folder);
+	LIB.updateItem();
+}
+
+/** 导入uirList里的所有文件到库里，并且移动到指定文件夹*/
+function importFiles(uirList,folder)
+{
+	for each(var uir in uirList)
+	{
+		//file = FLfile.platformPathToURI(file);
+		DOM.importFile(uir,true);
+		
+		if(folder!=null)
+		{
+			LIB.moveToFolder(folder,getFileNameByUIR(uir), true); 
+		}
+	}
+}
+
+/** 根据uir获取文件名*/
+function getFileNameByUIR(uir)
+{
+	if(uir!=null)
+	{
+		var folders = uir.split("/");
+		return folders.pop();
+	}
+	return null;
+}
+
+/**
+	创建一个原件，并制定原件名和as3.0导出类名
+*/
+function createItem(itemName,linkName,itemType)
+{
+	var r = LIB.addNewItem(itemType, itemName);
+	if(r==true)
+	{
+		var r = LIB.selectItem(itemName);
+		trace(1)
+		if(r==false)
+			return null;
+		var items = LIB.getSelectedItems();
+		trace(items[0].name)
+		if(linkName!=null)
+		{
+			items[0].linkageExportForAS = true;
+			items[0].linkageClassName = linkName;
+		}
+		trace(3)
+		return items[0];
+	}
+	return null;
+}
 
 function openTempleteFLA()
 {
@@ -52,6 +191,8 @@ function openTempleteFLA()
         {
 			trace(path);
 		}
+		
+	
 }
 
 function currentScriptPath()

@@ -255,7 +255,7 @@ package
 			ba = null;
 			
 			//图像偏移量加入字符串
-			_imagePos = _imagePos+image.nativePath+":"+shiftX.toFixed(1)+"|"+shiftY.toFixed(1)+";\n";
+			_imagePos = _imagePos+image.url+":"+shiftX.toFixed(1)+"|"+shiftY.toFixed(1)+";\n";
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)

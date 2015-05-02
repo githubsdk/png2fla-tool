@@ -1,14 +1,61 @@
--	�����е�
-��	����ɵ�
+﻿-	进行中的
+√	已完成的
 
-2015��5��1��22:34:34
-�������Ĳ������� 	��
-��������Ϣ���		��
-��ͼ�����룬���������浽�����ļ��У��ṩ��Ԥ��	��
-�������ϴεĹ���Ŀ¼	��
-����¼��ͼ���������Ϣ	��
-���ѽű����Ƶ�����Ŀ¼	��
-����ȡ��ǰ�ű�·�����Ա���������Զ������뷢��	��
-����fla����������Ϣ	
-�����ļ��е���ͼƬ��fla
+
+-------------------------------------------
+
+2015年5月1日22:34:34
+、基础的操作界面 	√
+、基础信息输出		√
+、图像载入，处理并保存到副本文件夹，提供简单预览	√  
+、保存上次的工作目录	√
+、记录新图像的坐标信息	√
+、把脚本复制到工作目录	√
+、获取当前脚本路径，以便接下来的自动化导入发布	√
+、打开fla读入坐标信息	
+、按文件夹导入图片到fla，建立文件夹，导入时间线并加入标签名
+	下面的示例在名为 folderTwo 的新文件夹中创建名为 start 的新按钮项目：
+		fl.getDocumentDOM().library.addNewItem("button", "folderTwo/start");
+
+	-文件夹命名 √
+		下面的示例创建两个新的库文件夹。第二个文件夹是第一个文件夹的子文件夹： 
+			fl.getDocumentDOM().library.newFolder("first/second"); 
+
+	-导入该文件夹下所有文件 √
+		下面的示例将项目 Symbol_1 移动到库文件夹 new，然后替换该文件夹中的同名项目： 
+			fl.getDocumentDOM().library.moveToFolder("new", "Symbol_1", true); 
+
+	-按顺序添加到舞台并添加label -
+		下面的示例将位于库中 folder1 内的项目 Symbol1 添加到舞台的 (550, 485) 位置： 
+			fl.getDocumentDOM().library.addItemToDocument({x:550.0, y:485.0}, "folder1/Symbol1"); 
+
+、导出png的时候，由文件夹做索引，保存一份png文件路径列表，名字从小到大排列（该功能 要关联配置文件里的 起始文件序号和文件间隔）
+、把文件夹结构格式化为下边结构
+、label的别名（把由文件夹的名字拼起来的名字替换成另一个字符串）
+
+-------------------------------------------
+
+http://help.adobe.com/zh_CN/flash/cs/extend/index.html
+
+标准：
+、子文件夹命名=frameLabel名字去后缀
+、root_xxxxxx
+	|-attack
+	|	|-up
+	|	|-upleft
+	|	|-upright
+	|	|-left
+	|	|-right
+	|	|-down
+	|	|-downleft
+	|	|-downright
+	|-idle
+	|	|-up
+	|	|-upleft
+	|	|-upright
+	|	|-left
+	|	|-right
+	|	|-down
+	|	|-downleft
+	|	|-downright
 
