@@ -41,6 +41,7 @@ package
 		protected var _executeCount:uint;
 		protected var _allFoundFiles:Dictionary;
 		protected var _allFoundFilesVec:Vector.<FileData>;
+		protected var _filesInFolderInfo:String;
 		protected var _allCopyConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
@@ -167,6 +168,7 @@ package
 			_allCopyConfigs = new Dictionary();
 			_allFoundFilesVec ||= new Vector.<FileData>();
 			_allFoundFilesVec.length = 0;
+			_filesInFolderInfo = "";
 			
 			_bmp = new Bitmap();
 			addChild(_bmp);
@@ -176,20 +178,30 @@ package
 			if(_panel.jpg.selected==true)
 				extentions.push(_panel.jpg.label);
 			//TODO:读入所有配置文件 children
+			var files_in_folder:String = "";
 			for each(var child:File in children)
 			{
 				if(child.isDirectory==false)
 					continue;
 				var vec:Vector.<FileData> = new Vector.<FileData>;
 				fildAllImages(child.getDirectoryListing(),extentions,vec, child);
-				if(vec.length>0)
+				var file_count:uint = vec.length;
+				if(file_count>0)
 				{
+					//文件按名称排序
+					vec = vec.sort(fileDataSort);
 					_allFoundFiles[child.url] = vec;
 					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
 					_allCopyConfigs[child.url] = readConfig(child);
+					for(var i:int = 0; i < file_count;++i)
+					{
+						var fullpath:String = vec[i].fullPath;
+						Debugger.log(fullpath);
+					}
 				}
-				_executeCount += vec.length;
+				_executeCount += file_count;
 			}
+			_filesInFolderInfo+=files_in_folder;
 			
 			log("本次处理文件数："+_executeCount);
 			extentions = null;
@@ -207,6 +219,13 @@ package
 					log("该目录下不存在必要的配置文件，请检查："+child.nativePath,"ff0000");
 				}
 			}*/
+		}
+		
+		protected function fileDataSort(a:FileData, b:FileData):int
+		{
+			if(a.fileNameIndex>b.fileNameIndex)
+				return 1;
+			return -1;
 		}
 		
 		protected function onAllImagesDone(...args):void
