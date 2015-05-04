@@ -1,7 +1,5 @@
 package
 {
-	import flash.desktop.Clipboard;
-	import flash.desktop.ClipboardFormats;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.DisplayObject;
@@ -38,10 +36,13 @@ package
 		protected var _workingPath:File;
 		protected var _bCopying:Boolean;
 		protected var _loader:Loader;
-		protected var _executeCount:uint;
 		protected var _allFoundFiles:Dictionary;
 		protected var _allFoundFilesVec:Vector.<FileData>;
-		protected var _filesInFolderInfo:String;
+		/**
+		 *输出文件的信息 
+		 */		
+		protected var _outPutFilsInfo:Dictionary;
+		protected var _filesInFolder:Dictionary;
 		protected var _allCopyConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
@@ -57,7 +58,6 @@ package
 		protected const JSFL_FILE:String = "auto_export.jsfl";
 		
 		protected var _bmd:BitmapData;
-		protected var _imagePos:String;
 		
 		/**
 		 *新的图像保存位置 
@@ -66,7 +66,7 @@ package
 		/**
 		 *新的图像偏移量保存文件 
 		 */		
-		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/image_pos.txt";
+		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/auto_pulish_info.txt";
 		
 		public function Png2Fla()
 		{
@@ -80,8 +80,8 @@ package
 			_panel.copy_progress.minimum = 0;
 			_panel.copy_progress.maximum = 1;
 			
-			var cfg:String = '{"x":"10","y":"200"}';
-			var o:Object = JSON.parse(cfg);
+		/*	var cfg:String = '{"x":"10","y":"200"}';
+			var o:Object = JSON.parse(cfg);*/
 			
 			var last_path:String = readLastPath(TOOL_DATA_FILE);
 			if(last_path!=null)
@@ -152,60 +152,67 @@ package
 				_loader = new Loader();
 				//_panel.uiloader.source = _loader;
 			}
-			_imagePos = null;
-			_imagePos = "";
 
 			_panel.start.enabled = false;
 			var children:Array = _workingPath.getDirectoryListing();
 			
-			_executeCount = 0;
 			for(var key:String in _allFoundFiles)
 			{
 				delete _allFoundFiles[key];
 			}
 			_allFoundFiles = null;
 			_allFoundFiles = new Dictionary();
+			for (key in _outPutFilsInfo)
+			{
+				delete _outPutFilsInfo[key];
+			}
+			_outPutFilsInfo = null;
+			_outPutFilsInfo = new Dictionary();
+			for (key in _filesInFolder)
+			{
+				delete _filesInFolder[key];
+			}
+			_filesInFolder = null;
+			_filesInFolder = new Dictionary();
 			_allCopyConfigs = new Dictionary();
 			_allFoundFilesVec ||= new Vector.<FileData>();
 			_allFoundFilesVec.length = 0;
-			_filesInFolderInfo = "";
-			
 			_bmp = new Bitmap();
 			addChild(_bmp);
+			
 			var extentions:Array = new Array();
 			if(_panel.png.selected==true)
 				extentions.push(_panel.png.label);
 			if(_panel.jpg.selected==true)
 				extentions.push(_panel.jpg.label);
-			//TODO:读入所有配置文件 children
-			var files_in_folder:String = "";
-			for each(var child:File in children)
+
+			//找出所有文件，添加必要信息保存成FileData列表
+			var allfiles:Vector.<FileData> = new Vector.<FileData>;
+			for each(var char:File in children)
 			{
-				if(child.isDirectory==false)
+				if(char.isDirectory==false)
 					continue;
-				var vec:Vector.<FileData> = new Vector.<FileData>;
-				fildAllImages(child.getDirectoryListing(),extentions,vec, child);
-				var file_count:uint = vec.length;
-				if(file_count>0)
-				{
-					//文件按名称排序
-					vec = vec.sort(fileDataSort);
-					_allFoundFiles[child.url] = vec;
-					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
-					_allCopyConfigs[child.url] = readConfig(child);
-					for(var i:int = 0; i < file_count;++i)
-					{
-						var fullpath:String = vec[i].fullPath;
-						Debugger.log(fullpath);
-					}
-				}
-				_executeCount += file_count;
+				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
 			}
-			_filesInFolderInfo+=files_in_folder;
-			
-			log("本次处理文件数："+_executeCount);
+			//按照每个文件的目录保存
+			for each(var fd:FileData in allfiles)
+			{
+				var vec:Vector.<FileData> = _filesInFolder[fd.fullPath];
+				if(vec==null)
+				{
+					_filesInFolder[fd.fullPath] = vec = new Vector.<FileData>;
+				}
+				vec.push(fd);
+			}
+			//排序文件
+			for each(vec in _filesInFolder)
+			{
+				vec = vec.sort(fileDataSort);
+				_allFoundFilesVec = _allFoundFilesVec.concat(vec);
+			}
+			log("本次处理文件数："+_allFoundFilesVec.length);
 			extentions = null;
-			executeAllImage(_allFoundFilesVec, onAllImagesDone);
+			executeAllImage(_allFoundFilesVec.reverse(), onAllImagesDone);
 			return;
 			/*for each(var child:File in children)
 			{
@@ -221,6 +228,22 @@ package
 			}*/
 		}
 		
+		/**
+		 *获得文件在根目录下的完整路径  
+		 * @param path
+		 * @return 
+		 * 
+		 */		
+		public function getFullPath(path:String):String
+		{
+			var fullpath:String = "";
+			if(path!=null)
+			{
+				fullpath = path.replace(_workingPath.url+"/","");
+			}
+			return fullpath;
+		}
+		
 		protected function fileDataSort(a:FileData, b:FileData):int
 		{
 			if(a.fileNameIndex>b.fileNameIndex)
@@ -232,23 +255,21 @@ package
 		{
 			updateState();
 			var file:File = _workingPath.parent;
-			saveContent(file.resolvePath(IMAGE_POS_FILE), _imagePos);
-			//System.setClipboard(_imagePos);
-			Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT, _imagePos);
-			_imagePos = null;
+			var content:String = "";
+			for (var fullpath:String in _outPutFilsInfo)
+			{
+				var fileinfo:Array = _outPutFilsInfo[fullpath];
+				content += fullpath+":"+fileinfo.join("?")+"\n";
+			}
+			saveContent(file.resolvePath(IMAGE_POS_FILE), content);
 			if(_panel.uiloader.contains(_bmp)==true)
 			{
 				_bmp.parent.removeChild(_bmp);
 				_bmp.bitmapData.dispose();
 			}
-			return;
-			executeJSFL();
 			
-			return;
-			//以下将jsfl拷贝到工作目录的代码不需要了
 			file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
-			var save_path:String = _workingPath.nativePath;
-			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			var save_path:String = getSavePath(_workingPath.nativePath);
 			var jsfl:File = new File(save_path);
 			copyConfig(file, JSFL_FILE,[ jsfl], callback);
 			function callback():void
@@ -257,6 +278,29 @@ package
 				jsfl = jsfl.resolvePath(JSFL_FILE);
 				jsfl.openWithDefaultApplication();
 			}
+			
+			return;
+			executeJSFL();
+			
+			return;
+			//以下将jsfl拷贝到工作目录的代码不需要了
+			
+		}
+		
+		/**
+		 *把路径转化为图片副本保存的路径 
+		 * @param path
+		 * @return 
+		 * 
+		 */		
+		protected function getSavePath(path:String, url:Boolean=false):String
+		{
+			var save_path:String = path;
+			if(url==false)
+				save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			else
+				save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			return save_path;
 		}
 		
 		protected function executeJSFL():void
@@ -292,13 +336,13 @@ package
 					shift_x = cfg.x;
 					shift_y = cfg.y;
 				}
-				executeImageAndSave(bmp.bitmapData, file, shift_x, shift_y);
+				executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
 				//addChild(_bmp);
 				//_panel.uiloader.source = _bmp;
 				_loader.unloadAndStop(true);
 				_loader.unload();
 				executeAllImage(images, onDone);
-				log(file.name+" 完成。");
+			//	log(file.nativePath+" 完成。");
 			}
 		}
 		
@@ -310,10 +354,11 @@ package
 		 * @param shiftY
 		 * 
 		 */		
-		protected function executeImageAndSave(source:BitmapData, image:File, shiftX:Number, shiftY:Number):void
+		protected function executeImageAndSave(source:BitmapData, fd:FileData, shiftX:Number, shiftY:Number):void
 		{
 			if(source==null)
 				return;
+			var image:File = fd.file;
 			var rect:Rectangle = getBitmapDataValidRect(source);
 			shiftX = shiftX - rect.x;
 			shiftY = shiftY - rect.y;
@@ -330,15 +375,24 @@ package
 			_bmp.y = -shiftY;
 
 			//保存处理过的图像
-			var save_path:String = image.nativePath;
-			save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+			var save_path:String = getSavePath(image.nativePath);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
 			ba = null;
 			
 			//图像偏移量加入字符串
-			_imagePos = _imagePos+image.url+":"+shiftX.toFixed(1)+"|"+shiftY.toFixed(1)+";\n";
+			var fullpath:String = fd.fullPath;
+			var fileinfo:Array = _outPutFilsInfo[fullpath];
+			if(fileinfo==null)
+			{
+				_outPutFilsInfo[fullpath] = fileinfo = new Array();
+			}
+			/*
+				fullpath:name|copyuil|x,y?name|copyuil|x,y?name|copyuil|x,y
+				fullpath:name|copyuil|x,y?name|copyuil|x,y?name|copyuil|x,y
+			*/
+			fileinfo.push(image.name+"|"+getSavePath(image.url,true)+"|"+shiftX.toFixed(1)+","+shiftY.toFixed(1));
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -373,7 +427,6 @@ package
 			{
 				if(extensions!=null &&extensions.indexOf( child.extension)>=0)
 				{
-					_executeCount++;
 					saveList.push(new FileData(child,root));
 				}
 			}
