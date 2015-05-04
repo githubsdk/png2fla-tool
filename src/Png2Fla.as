@@ -23,6 +23,7 @@ package
 	import flash.net.URLRequest;
 	import flash.text.TextFormat;
 	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
 	
 	import debugger.Debugger;
 	
@@ -38,7 +39,9 @@ package
 		protected var _bCopying:Boolean;
 		protected var _loader:Loader;
 		protected var _executeCount:uint;
-		protected var _allFiles:Vector.<File>;
+		protected var _allFoundFiles:Dictionary;
+		protected var _allFoundFilesVec:Vector.<FileData>;
+		protected var _allCopyConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
 		protected const CONFIG:String = "import_config.txt";
@@ -91,6 +94,23 @@ package
 			updateState();
 		}
 		
+		protected function readConfig(dir:File):Object
+		{
+			try
+			{
+				_fileStream.open(dir.resolvePath(CONFIG), FileMode.READ);
+				var content:String = _fileStream.readUTF();
+				var cfg:Object = JSON.parse(content);
+				return cfg;
+			} 
+			catch(error:Error) 
+			{
+				log(dir+"目录下不存在配置文件："+CONFIG);
+			}
+			
+			return null;
+		}
+		
 		protected function onSliderHandler(event:SliderEvent):void
 		{
 			Debugger.log(_panel.font_size.minimum, _panel.font_size.maximum, _panel.font_size.value);
@@ -138,8 +158,16 @@ package
 			var children:Array = _workingPath.getDirectoryListing();
 			
 			_executeCount = 0;
-			_allFiles ||= new Vector.<File>;
-			_allFiles.length = 0;
+			for(var key:String in _allFoundFiles)
+			{
+				delete _allFoundFiles[key];
+			}
+			_allFoundFiles = null;
+			_allFoundFiles = new Dictionary();
+			_allCopyConfigs = new Dictionary();
+			_allFoundFilesVec ||= new Vector.<FileData>();
+			_allFoundFilesVec.length = 0;
+			
 			_bmp = new Bitmap();
 			addChild(_bmp);
 			var extentions:Array = new Array();
@@ -147,10 +175,25 @@ package
 				extentions.push(_panel.png.label);
 			if(_panel.jpg.selected==true)
 				extentions.push(_panel.jpg.label);
-			fildAllImages(children,extentions);
+			//TODO:读入所有配置文件 children
+			for each(var child:File in children)
+			{
+				if(child.isDirectory==false)
+					continue;
+				var vec:Vector.<FileData> = new Vector.<FileData>;
+				fildAllImages(child.getDirectoryListing(),extentions,vec, child);
+				if(vec.length>0)
+				{
+					_allFoundFiles[child.url] = vec;
+					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
+					_allCopyConfigs[child.url] = readConfig(child);
+				}
+				_executeCount += vec.length;
+			}
+			
 			log("本次处理文件数："+_executeCount);
 			extentions = null;
-			executeAllImage(_allFiles, onAllImagesDone);
+			executeAllImage(_allFoundFilesVec, onAllImagesDone);
 			return;
 			/*for each(var child:File in children)
 			{
@@ -203,7 +246,7 @@ package
 			file.openWithDefaultApplication();
 		}
 		
-		protected function executeAllImage(images:Vector.<File>, onDone:Function):void
+		protected function executeAllImage(images:Vector.<FileData>, onDone:Function):void
 		{
 			if(images==null || images.length==0)
 			{
@@ -211,23 +254,32 @@ package
 					onDone.apply(null, null);
 				return;
 			}
-			var child:File = images.pop();
-			Debugger.log(child.extension, child.name);
+			var child:FileData = images.pop();
+			var file:File = child.file;
+			Debugger.log(file.extension, file.name);
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
-			_loader.load(new URLRequest(child.url));
+			_loader.load(new URLRequest(file.url));
 			
 			function onLoaderHandler(event:Event):void
 			{
 				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
-				executeImageAndSave(bmp.bitmapData, child, 136.4, 186.4);
+				var cfg:Object = _allCopyConfigs[child.root.url];
+				var shift_x:Number = 0;
+				var shift_y:Number = 0;
+				if(cfg!=null)
+				{
+					shift_x = cfg.x;
+					shift_y = cfg.y;
+				}
+				executeImageAndSave(bmp.bitmapData, file, shift_x, shift_y);
 				//addChild(_bmp);
 				//_panel.uiloader.source = _bmp;
 				_loader.unloadAndStop(true);
 				_loader.unload();
 				executeAllImage(images, onDone);
-				log(child.name+" 完成。");
+				log(file.name+" 完成。");
 			}
 		}
 		
@@ -286,7 +338,7 @@ package
 		 * @param children
 		 * 
 		 */		
-		protected function fildAllImages(children:Array,extensions:Array):void
+		protected function fildAllImages(children:Array,extensions:Array, saveList:Vector.<FileData>, root:File):void
 		{
 			if(children==null || children.length==0)
 				return;
@@ -296,17 +348,17 @@ package
 			if(child.isDirectory==true)
 			{
 				Debugger.log(child.extension, child.name);
-				fildAllImages(child.getDirectoryListing(),extensions);
+				fildAllImages(child.getDirectoryListing(),extensions, saveList,root);
 			}
 			else
 			{
 				if(extensions!=null &&extensions.indexOf( child.extension)>=0)
 				{
 					_executeCount++;
-					_allFiles.push(child);
+					saveList.push(new FileData(child,root));
 				}
 			}
-			fildAllImages(children,extensions);
+			fildAllImages(children,extensions, saveList,root);
 		}
 		
 		protected function executeAllFolders(children:Array):void
@@ -380,7 +432,7 @@ package
 		{
 			_panel.copy_config.enabled = _workingPath!=null ;//_panel.copy_progress.value==_panel.copy_progress.maximum 
 			_panel.override_copy.enabled = _workingPath!=null;
-			_panel.start.enabled = _workingPath!=null && (_allFiles==null || _allFiles.length==0);
+			_panel.start.enabled = _workingPath!=null && (_allFoundFilesVec==null || _allFoundFilesVec.length==0);
 			_panel.current_path.text = _workingPath==null ? "请选择工作目录":_workingPath.nativePath;
 		}
 	
