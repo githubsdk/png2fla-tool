@@ -1,7 +1,7 @@
 {
-	"x"="136.4",
-	"y"="186.4",
-	"commonframe"="2",
-	"grave"="1",
-	"ignore"="speciall,test,other,",
+	"x":"136.4",
+	"y":"186.4",
+	"commonframe":"2",
+	"grave":"1",
+	"ignore":"speciall,test,other,"
 }

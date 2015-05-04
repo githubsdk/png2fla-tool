@@ -82,8 +82,8 @@ package
 			_panel.copy_progress.minimum = 0;
 			_panel.copy_progress.maximum = 1;
 			
-		/*	var cfg:String = '{"x":"10","y":"200"}';
-			var o:Object = JSON.parse(cfg);*/
+			var cfg:String = '{"x":"10","y":"200"}';
+			var o:Object = JSON.parse(cfg);
 			
 			var last_path:String = readLastPath(TOOL_DATA_FILE);
 			if(last_path!=null)
@@ -102,9 +102,13 @@ package
 			try
 			{
 				_fileStream.open(dir.resolvePath(CONFIG), FileMode.READ);
-				var content:String = _fileStream.readUTF();
-				var cfg:Object = JSON.parse(content);
-				return cfg;
+				if(_fileStream.bytesAvailable>0)
+				{
+					var content:String = _fileStream.readUTFBytes(_fileStream.bytesAvailable);
+					var cfg:Object = JSON.parse(content);
+					return cfg;
+				}
+				_fileStream.close();
 			} 
 			catch(error:Error) 
 			{
@@ -195,6 +199,7 @@ package
 				if(char.isDirectory==false)
 					continue;
 				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
+				_allCopyConfigs[char.url] = readConfig(char);
 			}
 			//按照每个文件的目录保存
 			for each(var fd:FileData in allfiles)
