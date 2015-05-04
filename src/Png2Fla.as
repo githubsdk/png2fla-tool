@@ -381,10 +381,8 @@ package
 				return;
 			var image:File = fd.file;
 			var rect:Rectangle = getBitmapDataValidRect(source);
-			shiftX = shiftX - rect.x;
-			shiftY = shiftY - rect.y;
-			if(shiftX<0)
-				Debugger.log(shiftX);
+			var save_x:Number = shiftX - rect.x;
+			var save_y:Number = shiftY - rect.y;
 			var dest:BitmapData = new BitmapData(rect.width, rect.height);
 			dest.copyPixels(source, rect, new Point(0,0));
 			if(_bmp.bitmapData!=null)
@@ -392,8 +390,10 @@ package
 				_bmp.bitmapData.dispose();
 			}
 			_bmp.bitmapData = dest;
-			_bmp.x = -shiftX; 
-			_bmp.y = -shiftY;
+			save_x = -save_x;
+			save_y = -save_y;
+			_bmp.x = save_x;
+			_bmp.y = save_y;
 
 			//保存处理过的图像
 			var save_path:String = getSavePath(image.nativePath);
@@ -413,7 +413,7 @@ package
 				fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
 			fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
 			*/
-			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+shiftX.toFixed(1)+","+shiftY.toFixed(1));
+			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+save_x.toFixed(1)+","+save_y.toFixed(1));
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -423,7 +423,7 @@ package
 			_panel.uiloader.addChild(_bmp);
 			_panel.uiloader.graphics.clear();
 			_panel.uiloader.graphics.beginFill(0, 0.2);
-			_panel.uiloader.graphics.drawRect(-shiftX, -shiftY, rect.width, rect.height);
+			_panel.uiloader.graphics.drawRect(save_x, save_y, rect.width, rect.height);
 			_panel.uiloader.graphics.endFill();
 		}
 		
