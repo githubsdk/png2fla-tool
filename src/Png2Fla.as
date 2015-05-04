@@ -57,6 +57,8 @@ package
 		
 		protected const JSFL_FILE:String = "auto_export.jsfl";
 		
+		protected const TEMPLETE_FLA:String = "templete.fla";
+		
 		protected var _bmd:BitmapData;
 		
 		/**
@@ -258,8 +260,10 @@ package
 			var content:String = "";
 			for (var fullpath:String in _outPutFilsInfo)
 			{
+				if(content.length!=0)
+					content +="\n";
 				var fileinfo:Array = _outPutFilsInfo[fullpath];
-				content += fullpath+":"+fileinfo.join("?")+"\n";
+				content += fullpath+"[:]"+fileinfo.join("[?]");
 			}
 			saveContent(file.resolvePath(IMAGE_POS_FILE), content);
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -268,23 +272,35 @@ package
 				_bmp.bitmapData.dispose();
 			}
 			
-			file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
-			var save_path:String = getSavePath(_workingPath.nativePath);
-			var jsfl:File = new File(save_path);
-			copyConfig(file, JSFL_FILE,[ jsfl], callback);
-			function callback():void
-			{
-				
-				jsfl = jsfl.resolvePath(JSFL_FILE);
-				jsfl.openWithDefaultApplication();
-			}
-			
+			copyAndRunTempleteFileAndJSFL();
 			return;
 			executeJSFL();
 			
 			return;
 			//以下将jsfl拷贝到工作目录的代码不需要了
 			
+		}
+		
+		protected function copyAndRunTempleteFileAndJSFL():void
+		{
+			var file:File;
+			
+			file = File.applicationDirectory.resolvePath("templete/"+TEMPLETE_FLA);
+			var save_path:String = getSavePath(_workingPath.nativePath);
+			var target:File = new File(save_path);
+			copyConfig(file, TEMPLETE_FLA,[ target], copyJSFL);
+			function copyJSFL():void
+			{
+				file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
+				var jsfl:File = new File(save_path);
+				copyConfig(file, JSFL_FILE,[ jsfl], callback);
+				
+				function callback():void
+				{
+					jsfl = jsfl.resolvePath(JSFL_FILE);
+					jsfl.openWithDefaultApplication();
+				}
+			}
 		}
 		
 		/**
@@ -389,10 +405,10 @@ package
 				_outPutFilsInfo[fullpath] = fileinfo = new Array();
 			}
 			/*
-				fullpath:name|copyuil|x,y?name|copyuil|x,y?name|copyuil|x,y
-				fullpath:name|copyuil|x,y?name|copyuil|x,y?name|copyuil|x,y
+				fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
+			fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
 			*/
-			fileinfo.push(image.name+"|"+getSavePath(image.url,true)+"|"+shiftX.toFixed(1)+","+shiftY.toFixed(1));
+			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+shiftX.toFixed(1)+","+shiftY.toFixed(1));
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -569,7 +585,6 @@ package
 			var bmp:Bitmap = new Bitmap(bmd, PixelSnapping.AUTO, true);
 			addChild(bmp);
 			var rect:Rectangle = getBitmapDataValidRect(bmd);
-			trace(rect, bmp.getRect(this));
 			graphics.beginFill(0xff00ff);
 			graphics.drawRect(rect.x, rect.y, rect.width, rect.height);
 			graphics.endFill();
@@ -579,7 +594,6 @@ package
 		protected function openWithDefaultApplication(fileName:String="assets/icon.png"):void
 		{
 			var file:File = File.applicationDirectory.resolvePath(fileName);
-			trace(file.url);
 			file.openWithDefaultApplication();
 		}
 		
