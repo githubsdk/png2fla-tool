@@ -38,18 +38,23 @@ var params = "";
 
 var SCRIPT_PATH = currentScriptPath();
 
-var POS = FLfile.read(SCRIPT_PATH+"image_pos.txt");
+var INFO_CONTENT = FLfile.read(SCRIPT_PATH+"auto_pulish_info.txt");
 
 var DOM ;
 
 var LIB; 
+
+var PUBLISH_INFO;
 
 init();
 
 function init()
 {
 	fl.outputPanel.clear();
+
 	openTempleteFLA();
+	
+	parsePublishInfo();
 	
 	DOM = fl.getDocumentDOM();
 	LIB = DOM.library;
@@ -66,6 +71,8 @@ function init()
 		item.timeline.addNewLayer("label");
 		item.timeline.deleteLayer(2);
 	}
+	
+	/*
 	var folder = "attack/downleft";
 	createFolder(folder);
 	var uirList = ["file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0001.png",
@@ -74,8 +81,64 @@ function init()
 	
 	for(var i=0; i < 5; ++i)
 		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",5);
+	
+	*/
+	var uirlist = [];
+	var nameslist = [];
+	var poslist = [];
+	for (var folder in PUBLISH_INFO)
+	{
+		if(folder==null || folder=="")
+			continue;
+		//0002.png,file:///F:/foozuu_works/png2fla-tool/copy/hero_2010006/spell/down/0002.png,-152.0,-135.0
+		var infos = PUBLISH_INFO[folder];
+		for(var i=0; i < infos.length; ++i)
+		{
+			var fileinfo = infos[i];
+			nameslist.push(fileinfo[0]);
+			uirlist.push(fileinfo[1]);
+			poslist.push(fileinfo[2]);
+		}
+		createFolder(folder);
 		
-	saveFlaAndPublish(SCRIPT_PATH+"savefile.fla");
+		importFiles(uirlist,folder);
+		addItemsToTimeLine(folder,item_name,nameslist,poslist,"start","end",2);
+	}
+		return;
+	//saveFlaAndPublish(SCRIPT_PATH+"savefile.fla");
+}
+
+function parsePublishInfo()
+{
+	//fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
+	PUBLISH_INFO = {};
+	var content_array = INFO_CONTENT.split("\n");
+	
+	for each(var file_info in content_array)
+	{
+		var all_infos = file_info.split("[:]");
+		var key = all_infos[0];
+		var all_infos_string = all_infos[1] +"";
+		var file_info_array = all_infos_string.split("[?]");
+		
+		PUBLISH_INFO[key] = [];
+		/*
+		trace("*****************")
+		trace(key);
+		
+		if(key==null || key=="")
+		{
+			trace(all_infos);
+		}
+		trace("#################")
+		*/
+		for(var i=0;i < file_info_array.length;++i)
+		{
+			var info = file_info_array[i].split("[*]");
+			PUBLISH_INFO[key].push(info);
+		}
+		
+	}
 }
 
 function saveFlaAndPublish(savePath)
@@ -85,10 +148,11 @@ function saveFlaAndPublish(savePath)
 	fl.closeDocument(DOM);
 }
 
-function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInterval)
+function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, endLabel, frameInterval)
 {
 	var editable = LIB.editItem(itemName);
 	var r = LIB.selectItem(itemName);
+	trace(r);
 	var items = LIB.getSelectedItems();
 	var items_count = itemNames.length;
 	var timeline = items[0].timeline;
@@ -117,17 +181,20 @@ function addItemsToTimeLine(itemName, itemNames, startLabel, endLabel, frameInte
 	for(var i=0;i<items_count;++i)
 	{		
 		//选择起始帧
-		trace("---")
-		trace(add_index_start)
 		timeline.currentFrame = add_index_start;
 		if(i!=0)
 			timeline.convertToBlankKeyframes(add_index_start);
+		var add_item = folder+"/"+itemNames[i];
+		trace(add_item);
+		LIB.addItemToDocument({x:0, y:0},add_item);
+		var pos_string = posList[i];
+		var pos_array = pos_string.split(",");
 		
-		LIB.addItemToDocument({x:0, y:0},"attack/downleft/"+itemNames[i]);
 		//我也不知道为什么上边的坐标设置有问题，所以这里只好重新设置
 		var selected = DOM.selection[0];
-		selected.x = 100;
-		selected.y = 100;
+		
+		selected.x = Number(pos_array[0]);
+		selected.y = Number(pos_array[1]);
 		add_index_start+=frameInterval;
 		continue;
 		var dest_index = start_index+add_frames-1;
@@ -203,7 +270,6 @@ function createItem(itemName,linkName,itemType)
 
 function openTempleteFLA()
 {
-	trace(POS);
 	fl.openDocument(SCRIPT_PATH+templeteName);
 	var paths = getFolders(SCRIPT_PATH);
 	
