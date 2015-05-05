@@ -64,7 +64,7 @@ package
 		
 		protected const JSFL_FILE:String = "auto_export.jsfl";
 		
-		protected const TEMPLETE_FLA:String = "templete.fla";
+		protected const TEMPLETE_FOLDER:String = "templete";
 		
 		protected var _bmd:BitmapData;
 		
@@ -298,23 +298,16 @@ package
 		
 		protected function copyAndRunTempleteFileAndJSFL():void
 		{
-			var file:File;
-			
-			file = File.applicationDirectory.resolvePath("templete/"+TEMPLETE_FLA);
+			var file:File = File.applicationDirectory.resolvePath("templete");
 			var save_path:String = getSavePath(_workingPath.nativePath);
 			var target:File = new File(save_path);
-			copyConfig(file, TEMPLETE_FLA,[ target], copyJSFL);
-			function copyJSFL():void
+			copyConfig(file, TEMPLETE_FOLDER,[target], callback);
+			function callback():void
 			{
-				file = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
 				var jsfl:File = new File(save_path);
-				copyConfig(file, JSFL_FILE,[ jsfl], callback);
-				
-				function callback():void
-				{
-					jsfl = jsfl.resolvePath(JSFL_FILE);
-					jsfl.openWithDefaultApplication();
-				}
+				jsfl = jsfl.resolvePath(TEMPLETE_FOLDER);
+				jsfl = jsfl.resolvePath(JSFL_FILE);
+				jsfl.openWithDefaultApplication();
 			}
 		}
 		
