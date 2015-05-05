@@ -90,6 +90,9 @@ function init()
 	{
 		if(folder==null || folder=="")
 			continue;
+        nameslist.length = 0;
+        uirlist.length = 0;
+        poslist.length = 0;
 		//0002.png,file:///F:/foozuu_works/png2fla-tool/copy/hero_2010006/spell/down/0002.png,-152.0,-135.0
 		var infos = PUBLISH_INFO[folder];
 		for(var i=0; i < infos.length; ++i)
