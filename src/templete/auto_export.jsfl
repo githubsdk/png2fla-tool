@@ -45,10 +45,10 @@ var DOM ;
 var LIB; 
 
 var PUBLISH_INFO;
-
+/*
 var OUT_PUT_CONTENT = FLfile.read(SCRIPT_PATH+"sampler.json");
 
-init();
+
 
 var JSFL_PATH = SCRIPT_PATH+"";
 var included = {};
@@ -69,6 +69,8 @@ for (var key in o )
 }
 
 trace(JSON.decode('{"x":10,"y":99}'))
+*/
+init();
 
 function init()
 {
@@ -76,7 +78,6 @@ function init()
 
 	openTempleteFLA();
 	
-	return;
 	parsePublishInfo();
 	
 	DOM = fl.getDocumentDOM();

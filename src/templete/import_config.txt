@@ -1,7 +1,25 @@
 {
-	"x":"208",
-	"y":"252.4",
-	"commonframe":"2",
-	"grave":"1",
-	"ignore":"speciall,test,other,"
+	"x":208,
+	"y":252.4,
+	"charfolder":{
+		"ignor":["special","auto","svn"],
+		"interval":2,
+		"special_interval":{
+			"grave":1,
+			"test":8
+		},
+		
+		
+		"folders":{
+			"hero_2010006/spell/down":{
+				"alias":"",
+				"interval":3,
+				"list":[]
+			}
+		},
+		
+		"classname":"",
+		"flaname":""
+
+	}
 }
