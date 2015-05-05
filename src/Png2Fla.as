@@ -42,7 +42,14 @@ package
 		 *输出文件的信息 
 		 */		
 		protected var _outPutFilsInfo:Dictionary;
-		protected var _filesInFolder:Dictionary;
+		/**
+		 *每个子文件夹下的文件 
+		 */		
+		protected var _filesInEveryFolder:Dictionary;
+		/**
+		 *每个角色文件夹下的文件列表 
+		 */		
+		protected var _filesInCharFolder:Dictionary;
 		protected var _allCopyConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
@@ -128,6 +135,11 @@ package
 		{
 			switch(event.target)
 			{
+				case _panel.jsfl:
+				{
+					copyAndRunTempleteFileAndJSFL();
+					break;
+				}
 				case _panel.start:
 				{
 					start();
@@ -174,12 +186,20 @@ package
 			}
 			_outPutFilsInfo = null;
 			_outPutFilsInfo = new Dictionary();
-			for (key in _filesInFolder)
+			for (key in _filesInEveryFolder)
 			{
-				delete _filesInFolder[key];
+				delete _filesInEveryFolder[key];
 			}
-			_filesInFolder = null;
-			_filesInFolder = new Dictionary();
+			_filesInEveryFolder = null;
+			_filesInEveryFolder = new Dictionary();
+			
+			for (key in _filesInCharFolder)
+			{
+				delete _filesInCharFolder[key];
+			}
+			_filesInCharFolder = null;
+			_filesInCharFolder = new Dictionary();
+			
 			_allCopyConfigs = new Dictionary();
 			_allFoundFilesVec ||= new Vector.<FileData>();
 			_allFoundFilesVec.length = 0;
@@ -199,20 +219,10 @@ package
 				if(char.isDirectory==false)
 					continue;
 				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
-				_allCopyConfigs[char.url] = readConfig(char);
-			}
-			//按照每个文件的目录保存
-			for each(var fd:FileData in allfiles)
-			{
-				var vec:Vector.<FileData> = _filesInFolder[fd.fullPath];
-				if(vec==null)
-				{
-					_filesInFolder[fd.fullPath] = vec = new Vector.<FileData>;
-				}
-				vec.push(fd);
+				_allCopyConfigs[char.name] = readConfig(char);
 			}
 			//排序文件
-			for each(vec in _filesInFolder)
+			for each(var vec:Vector.<FileData> in _filesInEveryFolder)
 			{
 				vec = vec.sort(fileDataSort);
 				_allFoundFilesVec = _allFoundFilesVec.concat(vec);
@@ -241,12 +251,12 @@ package
 		 * @return 
 		 * 
 		 */		
-		public function getFullPath(path:String):String
+		public function getFullPath(url:String):String
 		{
 			var fullpath:String = "";
-			if(path!=null)
+			if(url!=null)
 			{
-				fullpath = path.replace(_workingPath.url+"/","");
+				fullpath = url.replace(_workingPath.url+"/","");
 			}
 			return fullpath;
 		}
@@ -263,14 +273,16 @@ package
 			updateState();
 			var file:File = _workingPath.parent;
 			var content:String = "";
-			for (var fullpath:String in _outPutFilsInfo)
+			var jsons:Array = new Array();
+			for (var char_folder:String in _filesInCharFolder)
 			{
-				if(content.length!=0)
-					content +="\n";
-				var fileinfo:Array = _outPutFilsInfo[fullpath];
-				content += fullpath+"[:]"+fileinfo.join("[?]");
+				var json:Object = generateSaveContent(char_folder, getFullPath(_workingPath.resolvePath(char_folder).url) );
+				jsons.push(json);
 			}
+			content = JSON.stringify(jsons);
 			saveContent(file.resolvePath(IMAGE_POS_FILE), content);
+			
+			
 			if(_panel.uiloader.contains(_bmp)==true)
 			{
 				_bmp.parent.removeChild(_bmp);
@@ -282,8 +294,6 @@ package
 			executeJSFL();
 			
 			return;
-			//以下将jsfl拷贝到工作目录的代码不需要了
-			
 		}
 		
 		protected function copyAndRunTempleteFileAndJSFL():void
@@ -326,6 +336,7 @@ package
 		
 		protected function executeJSFL():void
 		{
+			return;
 			var file:File = File.applicationDirectory.resolvePath("templete/"+JSFL_FILE);
 			file.openWithDefaultApplication();
 		}
@@ -349,7 +360,7 @@ package
 				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
-				var cfg:Object = _allCopyConfigs[child.root.url];
+				var cfg:Object = _allCopyConfigs[child.root.name];
 				var shift_x:Number = 0;
 				var shift_y:Number = 0;
 				if(cfg!=null)
@@ -381,8 +392,8 @@ package
 				return;
 			var image:File = fd.file;
 			var rect:Rectangle = getBitmapDataValidRect(source);
-			var save_x:Number = shiftX - rect.x;
-			var save_y:Number = shiftY - rect.y;
+			fd.shiftX =  rect.x-shiftX;
+			fd.shiftY =  rect.y-shiftY;
 			var dest:BitmapData = new BitmapData(rect.width, rect.height);
 			dest.copyPixels(source, rect, new Point(0,0));
 			if(_bmp.bitmapData!=null)
@@ -390,10 +401,8 @@ package
 				_bmp.bitmapData.dispose();
 			}
 			_bmp.bitmapData = dest;
-			save_x = -save_x;
-			save_y = -save_y;
-			_bmp.x = save_x;
-			_bmp.y = save_y;
+			_bmp.x = fd.shiftX;
+			_bmp.y = fd.shiftY;
 
 			//保存处理过的图像
 			var save_path:String = getSavePath(image.nativePath);
@@ -413,7 +422,7 @@ package
 				fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
 			fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
 			*/
-			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+save_x.toFixed(1)+","+save_y.toFixed(1));
+			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+fd.shiftX.toFixed(1)+","+fd.shiftY.toFixed(1));
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -423,8 +432,97 @@ package
 			_panel.uiloader.addChild(_bmp);
 			_panel.uiloader.graphics.clear();
 			_panel.uiloader.graphics.beginFill(0, 0.2);
-			_panel.uiloader.graphics.drawRect(save_x, save_y, rect.width, rect.height);
+			_panel.uiloader.graphics.drawRect(fd.shiftX, fd.shiftY, rect.width, rect.height);
 			_panel.uiloader.graphics.endFill();
+		}
+		
+		protected function generateSaveContent(charName:String, charFullPath:String):Object
+		{
+			var files_in_path:Vector.<FileData> = _filesInEveryFolder[charFullPath];
+			var DQM:String = '"';
+			var first_up:String = charName;
+			var json:Object = _allCopyConfigs[charName];
+			json = ObjectUtils.clone(json);
+			delete json["x"];
+			delete json["y"];
+			var save_data:Object = json[charName] = json["charfolder"];
+			delete json["charfolder"];
+			
+			save_data.classname = charName;
+			save_data.flaname = charName;
+			//TODO: 生成新的对象，赋值给folders
+			var files_info_obj:Object = save_data.folders;
+			files_info_obj ||= new Object();
+			for (var fullname:String in _filesInEveryFolder)
+			{
+				var files_cfg_obj:Object = files_info_obj[fullname];
+				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
+				if(files_cfg_obj==null)
+				{
+					files_info_obj[fullname] = files_cfg_obj = new Object();
+				}
+				var list:Vector.<FileData> = _filesInEveryFolder[fullname];
+				var count:uint = list.length;
+				var infos:Array = new Array();
+				for (var i:int = 0; i < count; ++i)
+				{
+					var fd:FileData = list[i];
+					infos.push([fd.file.name,fd.file.url,fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+				}
+				files_cfg_obj.list = infos;
+			}
+			var content:String = JSON.stringify(json);
+			return json;
+			/*	
+				''								
+				+DQM+charName+DQM+':{										\
+		"folders":{													\
+			"hero_2010006/spell/down":{				\
+				"alias":"",											\
+				"interval":3,											\
+				"list":[													\
+					["0001.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0001.png","-56.0,-119.4"],\
+					["0002.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0002.png","-56.0,-119.4"]\
+				]															\
+			}																\
+		},																	\
+		"ignor":[														\
+			"special",												\
+			"auto",														\
+			"svn"														\
+			],																\
+		"interval":2,													\
+		"special_interval":{									\
+			"grave":1													\
+		},																	\
+		"name":"Role_100"									\
+		';									
+			*/
+			/**
+			 "role_100":{
+		"folders":{
+			"hero_2010006/spell/down":{
+				"alias":"",
+				"interval":3,
+				"list":[
+					["0001.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0001.png","-56.0,-119.4"],
+					["0002.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0002.png","-56.0,-119.4"]
+				]
+			}
+		},
+		"ignor":[
+			"special",
+			"auto",
+			"svn"
+			],
+		"interval":2,
+		"special_interval":{
+			"grave":1
+		},
+		"name":"Role_100"
+			
+			 */
+			return null;
 		}
 		
 		/**
@@ -448,7 +546,17 @@ package
 			{
 				if(extensions!=null &&extensions.indexOf( child.extension)>=0)
 				{
-					saveList.push(new FileData(child,root));
+					var fd:FileData = new FileData(child,root);
+					saveList.push(fd);
+					var vec:Vector.<FileData> = _filesInEveryFolder[fd.fullPath];
+					if(vec==null)
+						_filesInEveryFolder[fd.fullPath] = vec = new Vector.<FileData>;
+					vec.push(fd);
+					
+					var list:Dictionary = _filesInCharFolder[fd.root.name];
+					if(list==null)
+						_filesInCharFolder[fd.root.name]=list = new Dictionary();
+					list[fd.fullPath] = vec;
 				}
 			}
 			fildAllImages(children,extensions, saveList,root);

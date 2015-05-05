@@ -8,11 +8,15 @@ package
 		protected var _root:File;
 		protected var _nameIndex:int;
 		protected var _fullPath:String;
+		protected var _shiftX:Number;
+		protected var _shiftY:Number;
+		
 		public function FileData(file:File=null, root:File=null)
 		{
 			_file = file;
 			_root = root;
 			_nameIndex = -1;
+			_shiftX = _shiftY = 0;
 		}
 
 		public function get file():File
@@ -51,6 +55,26 @@ package
 				}
 			}
 			return _nameIndex;
+		}
+
+		public function get shiftX():Number
+		{
+			return _shiftX;
+		}
+
+		public function set shiftX(value:Number):void
+		{
+			_shiftX = value;
+		}
+
+		public function get shiftY():Number
+		{
+			return _shiftY;
+		}
+
+		public function set shiftY(value:Number):void
+		{
+			_shiftY = value;
 		}
 
 
