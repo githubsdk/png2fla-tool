@@ -4,9 +4,8 @@
 	"charfolder":{
 		"ignor":["special","auto","svn"],
 		"interval":2,
-		"special_interval":{
-			"grave":1,
-			"test":8
+		"special":{
+			"grave":{"x":10,"y":10,"interval":1}
 		},
 		
 		
