@@ -36,40 +36,31 @@ h=水平居中
 */
 var params = "";
 
-var SCRIPT_PATH = currentScriptPath();
+var SCRIPT_PATH = getFolderPath(fl.scriptURI,1);
 
-var INFO_CONTENT = FLfile.read(SCRIPT_PATH+"auto_pulish_info.txt");
+var WORKING_PATH = getFolderPath(SCRIPT_PATH,2);
+
+var OUT_PUT_CONTENT = FLfile.read(WORKING_PATH+"auto_pulish_info.txt");
 
 var DOM ;
 
 var LIB; 
 
 var PUBLISH_INFO;
-/*
-var OUT_PUT_CONTENT = FLfile.read(SCRIPT_PATH+"sampler.json");
 
 
-
-var JSFL_PATH = SCRIPT_PATH+"";
 var included = {};
 function include(file) {
 	if (included[file]) { return; }
 	included[file] = true;
-	trace(JSFL_PATH+file)
-	eval(FLfile.read(JSFL_PATH+file+".jsfl"));
+	trace(SCRIPT_PATH+file+".jsfl")
+	eval(FLfile.read(SCRIPT_PATH+file+".jsfl"));
 }
  
 include("JSON");
 
-var o = JSON.decode(OUT_PUT_CONTENT);
-for (var key in o )
-{
-	trace(key);
-	trace(o[key])
-}
+PUBLISH_INFO = JSON.decode(OUT_PUT_CONTENT);
 
-trace(JSON.decode('{"x":10,"y":99}'))
-*/
 init();
 
 function init()
@@ -96,17 +87,6 @@ function init()
 		item.timeline.deleteLayer(2);
 	}
 	
-	/*
-	var folder = "attack/downleft";
-	createFolder(folder);
-	var uirList = ["file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0001.png",
-	"file:///F:/foozuu_works/png2fla-tool/bin-debug/assets/copy/hero_2010006/hero_2010006_attack/downleft_attack/04-downleft-0002.png"];
-	importFiles(uirList,folder);
-	
-	for(var i=0; i < 5; ++i)
-		addItemsToTimeLine(item_name,["04-downleft-0001.png","04-downleft-0002.png"],"start","end",5);
-	
-	*/
 	var uirlist = [];
 	var nameslist = [];
 	var poslist = [];
@@ -308,15 +288,19 @@ function openTempleteFLA()
 	
 }
 
-function currentScriptPath()
+function getFolderPath(url,popCount)
 {
-	var url = fl.scriptURI;
+	//var url = fl.scriptURI;
 
 	var parts = url.split("/");
-	var script_name = parts.pop();
-	url = url.replace(script_name,"");
+	var script_name;
+	for(var i=0;i<popCount;++i)
+	{
+		script_name = parts.pop();
+	}
 	
-	return url;
+	url = parts.join("/");
+	return url+"/";
 }
  
 //f();
