@@ -53,7 +53,6 @@ var included = {};
 function include(file) {
 	if (included[file]) { return; }
 	included[file] = true;
-	trace(SCRIPT_PATH+file+".jsfl")
 	eval(FLfile.read(SCRIPT_PATH+file+".jsfl"));
 }
  
@@ -67,52 +66,66 @@ function init()
 {
 	fl.outputPanel.clear();
 
-	openTempleteFLA();
 	
-	parsePublishInfo();
 	
-	DOM = fl.getDocumentDOM();
-	LIB = DOM.library;
-	
-	var item_name = "role";
-	var item = createItem(item_name, "Role","movie clip");
-	
-	var editable = LIB.editItem(item_name);
-	
-	if(item!=null && editable==true)
+	for each(var chars_info in PUBLISH_INFO)
 	{
-		//默认参数，先添加在上边的图层
-		item.timeline.addNewLayer("res");
-		item.timeline.addNewLayer("label");
-		item.timeline.deleteLayer(2);
-	}
-	
-	var uirlist = [];
-	var nameslist = [];
-	var poslist = [];
-	for (var folder in PUBLISH_INFO)
-	{
-		if(folder==null || folder=="")
-			continue;
-        nameslist.length = 0;
-        uirlist.length = 0;
-        poslist.length = 0;
-		//0002.png,file:///F:/foozuu_works/png2fla-tool/copy/hero_2010006/spell/down/0002.png,-152.0,-135.0
-		var infos = PUBLISH_INFO[folder];
-		for(var i=0; i < infos.length; ++i)
+		for (var char_name in chars_info)
 		{
-			var fileinfo = infos[i];
-			nameslist.push(fileinfo[0]);
-			uirlist.push(fileinfo[1]);
-			poslist.push(fileinfo[2]);
+			openTempleteFLA();
+
+			DOM = fl.getDocumentDOM();
+			LIB = DOM.library;
+			
+			//原件名配置
+			var char_cfg = chars_info[char_name];
+			var item_name = char_cfg.classname;
+			var item = createItem(item_name, item_name,"movie clip");
+			
+			//图层配置
+			var editable = LIB.editItem(item_name);
+			if(item!=null && editable==true)
+			{
+				//默认参数，先添加在上边的图层
+				var layers_count = char_cfg.layers.length;
+				for(var layer_index=0;layer_index<layers_count;++layer_index)
+				{
+					item.timeline.addNewLayer(char_cfg.layers[layer_index]);
+				}
+				item.timeline.deleteLayer(layers_count);
+			}
+			//每个文件夹下所有文件的配置
+			var folders_cfg = char_cfg.folders;
+			var uirlist = [];
+			var nameslist = [];
+			var poslist = [];
+
+			for (var folder in folders_cfg)
+			{
+				if(folder==null || folder=="")
+					continue;
+		        nameslist.length = 0;
+		        uirlist.length = 0;
+		        poslist.length = 0;
+				//0002.png,file:///F:/foozuu_works/png2fla-tool/copy/hero_2010006/spell/down/0002.png,-152.0,-135.0
+				var files_info_list = folders_cfg[folder].list;
+				var files_count = files_info_list.length;
+				for(var file_index=0; file_index < files_count; ++file_index)
+				{
+					var fileinfo = files_info_list[file_index];
+					nameslist.push(fileinfo[0]);
+					uirlist.push(fileinfo[1]);
+					poslist.push([fileinfo[2],fileinfo[3]]);
+				}
+				createFolder(folder);
+				
+				importFiles(uirlist,folder);
+				addItemsToTimeLine(folder,item_name,nameslist,poslist,"start","end",2);
+			}
+			saveFlaAndPublish(SCRIPT_PATH+char_cfg.flaname+".fla");
 		}
-		createFolder(folder);
 		
-		importFiles(uirlist,folder);
-		addItemsToTimeLine(folder,item_name,nameslist,poslist,"start","end",2);
 	}
-		return;
-	//saveFlaAndPublish(SCRIPT_PATH+"savefile.fla");
 }
 
 function parsePublishInfo()
@@ -194,8 +207,8 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 		var add_item = folder+"/"+itemNames[i];
 		trace(add_item);
 		LIB.addItemToDocument({x:0, y:0},add_item);
-		var pos_string = posList[i];
-		var pos_array = pos_string.split(",");
+		
+		var pos_array = posList[i];
 		
 		//我也不知道为什么上边的坐标设置有问题，所以这里只好重新设置
 		var selected = DOM.selection[0];
@@ -219,6 +232,8 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 /** 创建一个顶级文件夹*/
 function createFolder(folder)
 {
+	trace("now add folder");
+	trace(folder);
 	LIB.selectNone();
 	LIB.newFolder(folder);
 	LIB.updateItem();
@@ -259,17 +274,14 @@ function createItem(itemName,linkName,itemType)
 	if(r==true)
 	{
 		var r = LIB.selectItem(itemName);
-		trace(1)
 		if(r==false)
 			return null;
 		var items = LIB.getSelectedItems();
-		trace(items[0].name)
 		if(linkName!=null)
 		{
 			items[0].linkageExportForAS = true;
 			items[0].linkageClassName = linkName;
 		}
-		trace(3)
 		return items[0];
 	}
 	return null;
@@ -277,15 +289,7 @@ function createItem(itemName,linkName,itemType)
 
 function openTempleteFLA()
 {
-	fl.openDocument(SCRIPT_PATH+templeteName);
-	var paths = getFolders(SCRIPT_PATH);
-	
-	for each (var path in paths)
-        {
-			trace(path);
-		}
-		
-	
+	fl.openDocument(SCRIPT_PATH+templeteName);	
 }
 
 function getFolderPath(url,popCount)
