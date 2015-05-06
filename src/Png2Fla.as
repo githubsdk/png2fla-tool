@@ -448,6 +448,7 @@ package
 			files_info_obj ||= new Object();
 			for (var fullname:String in _filesInEveryFolder)
 			{
+				//文件夹key值
 				var keyname:String = fullname.replace(charName+"/","");
 				var files_cfg_obj:Object = files_info_obj[keyname];
 				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
@@ -458,7 +459,14 @@ package
 				var list:Vector.<FileData> = _filesInEveryFolder[fullname];
 				var count:uint = list.length;
 				var infos:Array = new Array();
-				for (var i:int = 0; i < count; ++i)
+				//文件间隔，有的文件夹不需要全部图片都导入，如果无值，则赋值1，以防死循环
+				var interval:int = files_cfg_obj.interval;
+				if(interval==0)
+				{
+					interval = save_data.interval || 1;
+				}
+				//写入list内容
+				for (var i:int = 0; i < count; i+=interval)
 				{
 					var fd:FileData = list[i];
 					infos.push([fd.file.name,getSavePath(fd.file.url,true),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
