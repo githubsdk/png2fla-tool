@@ -153,7 +153,7 @@ package
 				case _panel.copy_config:
 				{
 					var source:File = File.applicationDirectory.resolvePath("templete/"+CONFIG);
-					copyConfig(source, CONFIG, _workingPath.getDirectoryListing());
+					copyConfig(source, CONFIG, _workingPath.getDirectoryListing(),updateState,_panel.override_copy.selected);
 					break;
 				}
 			}
@@ -301,7 +301,7 @@ package
 			var file:File = File.applicationDirectory.resolvePath("templete");
 			var save_path:String = getSavePath(_workingPath.nativePath);
 			var target:File = new File(save_path);
-			copyConfig(file, TEMPLETE_FOLDER,[target], callback);
+			copyConfig(file, TEMPLETE_FOLDER,[target], callback,true);
 			function callback():void
 			{
 				var jsfl:File = new File(save_path);
@@ -448,11 +448,12 @@ package
 			files_info_obj ||= new Object();
 			for (var fullname:String in _filesInEveryFolder)
 			{
-				var files_cfg_obj:Object = files_info_obj[fullname];
+				var keyname:String = fullname.replace(charName+"/","");
+				var files_cfg_obj:Object = files_info_obj[keyname];
 				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
 				if(files_cfg_obj==null)
 				{
-					files_info_obj[fullname] = files_cfg_obj = new Object();
+					files_info_obj[keyname] = files_cfg_obj = new Object();
 				}
 				var list:Vector.<FileData> = _filesInEveryFolder[fullname];
 				var count:uint = list.length;
@@ -460,7 +461,7 @@ package
 				for (var i:int = 0; i < count; ++i)
 				{
 					var fd:FileData = list[i];
-					infos.push([fd.file.name,fd.file.url,fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+					infos.push([fd.file.name,getSavePath(fd.file.url,true),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				files_cfg_obj.list = infos;
 			}
@@ -578,7 +579,7 @@ package
 		 * @param childrens
 		 * 
 		 */		
-		protected function copyConfig(source:File, destPath:String, children:Array, callBack:Function=null):void
+		protected function copyConfig(source:File, destPath:String, children:Array, callBack:Function=null,bOverride:Boolean=false):void
 		{
 			if(children==null || children.length==0)
 			{
@@ -593,19 +594,19 @@ package
 			if(child.isDirectory==true)
 			{
 				Debugger.log(child.nativePath);
-				source.copyToAsync(dest, _panel.override_copy.selected);
+				source.copyToAsync(dest, bOverride);
 				source.addEventListener(Event.COMPLETE, onCopyHandler);
 				source.addEventListener(IOErrorEvent.IO_ERROR, onCopyHandler);
 			}else{
 				Debugger.log(child.name);
-				copyConfig(source, destPath, children,callBack);
+				copyConfig(source, destPath, children,callBack,bOverride);
 			}
 			
 			function onCopyHandler(e:Event):void
 			{
 				source.removeEventListener(Event.COMPLETE, onCopyHandler);
 				source.removeEventListener(IOErrorEvent.IO_ERROR, onCopyHandler);
-				copyConfig(source, destPath, children,callBack);
+				copyConfig(source, destPath, children,callBack,bOverride);
 				switch(e.type)
 				{
 					case IOErrorEvent.IO_ERROR:
