@@ -222,10 +222,13 @@ package
 				_allCopyConfigs[char.name] = readConfig(char);
 			}
 			//排序文件
-			for each(var vec:Vector.<FileData> in _filesInEveryFolder)
+			for each(var folder_files_dic:Dictionary in _filesInEveryFolder)
 			{
-				vec = vec.sort(fileDataSort);
-				_allFoundFilesVec = _allFoundFilesVec.concat(vec);
+				for each(var vec:Vector.<FileData> in folder_files_dic)
+				{
+					vec = vec.sort(fileDataSort);
+					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
+				}
 			}
 			log("本次处理文件数："+_allFoundFilesVec.length);
 			extentions = null;
@@ -431,7 +434,7 @@ package
 		
 		protected function generateSaveContent(charName:String, charFullPath:String):Object
 		{
-			var files_in_path:Vector.<FileData> = _filesInEveryFolder[charFullPath];
+			var folder_files_dic:Dictionary = _filesInEveryFolder[charFullPath];
 			var DQM:String = '"';
 			var first_up:String = charName;
 			var json:Object = _allCopyConfigs[charName];
@@ -450,7 +453,7 @@ package
 			//生成新的对象，赋值给folders
 			var files_info_obj:Object = save_data.folders;
 			files_info_obj ||= new Object();
-			for (var fullname:String in _filesInEveryFolder)
+			for (var fullname:String in folder_files_dic)
 			{
 				//文件夹key值
 				var keyname:String = fullname.replace(charName+"/","");
@@ -465,7 +468,7 @@ package
 				{
 					files_info_obj[keyname] = files_cfg_obj = new Object();
 				}
-				var list:Vector.<FileData> = _filesInEveryFolder[fullname];
+				var list:Vector.<FileData> = folder_files_dic[fullname];
 				var count:uint = list.length;
 				var infos:Array = new Array();
 				//文件间隔，有的文件夹不需要全部图片都导入，如果无值，则赋值1，以防死循环
@@ -554,9 +557,12 @@ package
 				{
 					var fd:FileData = new FileData(child,root);
 					saveList.push(fd);
-					var vec:Vector.<FileData> = _filesInEveryFolder[fd.fullPath];
+					var folder_file_dic:Dictionary = _filesInEveryFolder[root.name];
+					if(folder_file_dic==null)
+						_filesInEveryFolder[root.name] = folder_file_dic = new Dictionary();
+					var vec:Vector.<FileData> = folder_file_dic[fd.fullPath];
 					if(vec==null)
-						_filesInEveryFolder[fd.fullPath] = vec = new Vector.<FileData>;
+						folder_file_dic[fd.fullPath] = vec = new Vector.<FileData>;
 					vec.push(fd);
 					
 					var list:Dictionary = _filesInCharFolder[fd.root.name];
