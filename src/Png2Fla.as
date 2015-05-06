@@ -441,15 +441,23 @@ package
 			var save_data:Object = json[charName] = json["charfolder"];
 			delete json["charfolder"];
 			
+			var ignor_folders:Array = save_data.ignor || [];
+			delete json.ignor;
+			
 			save_data.classname = charName;
 			save_data.flaname = charName;
-			//TODO: 生成新的对象，赋值给folders
+			//生成新的对象，赋值给folders
 			var files_info_obj:Object = save_data.folders;
 			files_info_obj ||= new Object();
 			for (var fullname:String in _filesInEveryFolder)
 			{
 				//文件夹key值
 				var keyname:String = fullname.replace(charName+"/","");
+				var folder_names_list:Array = keyname.split("/");
+				var first_folder:String = folder_names_list[0];
+				//忽略文件夹跳过
+				if(ignor_folders.indexOf(first_folder)>=0)
+					continue;
 				var files_cfg_obj:Object = files_info_obj[keyname];
 				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
 				if(files_cfg_obj==null)
@@ -472,6 +480,24 @@ package
 					infos.push([fd.file.name,getSavePath(fd.file.url,true),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				files_cfg_obj.list = infos;
+				files_cfg_obj.interval = interval;
+				delete save_data.interva;
+				
+				//label 
+				var start_label:String = "start";
+				var reverse_folder_names:Array = folder_names_list.reverse();
+				var prefix:String = reverse_folder_names.join(save_data.join);
+				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
+				{
+					start_label = prefix+save_data.labels[first_folder].start_suffix;
+				}
+				var end_label:String = "end";
+				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
+				{
+					end_label = prefix+save_data.labels[first_folder].end_suffix;
+				}
+				files_cfg_obj.start_label = start_label;
+				files_cfg_obj.end_label = end_label;
 			}
 			var content:String = JSON.stringify(json);
 			return json;

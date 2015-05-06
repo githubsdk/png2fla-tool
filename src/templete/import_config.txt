@@ -4,7 +4,6 @@
   "charfolder": {
     "ignor": [
       "special",
-      "auto",
       "svn"
     ],
     "interval": 2,
@@ -12,10 +11,15 @@
       "res",
       "label"
     ],
-    "label": {
+    "join":"_",
+    "labels": {
       "spell": {
-        "prefix": "",
-        "suffix": ""
+        "start_suffix": "_start",
+        "end_suffix": "_end"
+      },
+      "attack": {
+        "start_suffix": "_start",
+        "end_suffix": "_end"
       }
     },
     "folders": {
@@ -24,7 +28,9 @@
         "y": 10,
         "label": "gravestone",
         "interval": 1,
-        "list": []
+        "list": [],
+        "start_label": "_start",
+        "end_label": "_end"
       },
       "spell/down": {
         "x": 0,
@@ -32,15 +38,13 @@
         "label": "",
         "interval": 0,
         "list": [],
-        "intert": [
+        "start_label": "_start",
+        "end_label": "_end",
+        "instert": [
           {
             "frame": 1,
-            "label": {
-              "spell": {
-                "prefix": "",
-                "suffix": ""
-              }
-            }
+            "start_suffix": "_start",
+            "end_suffix": "_end"
           }
         ]
       }

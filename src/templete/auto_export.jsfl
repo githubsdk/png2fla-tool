@@ -108,7 +108,8 @@ function init()
 		        uirlist.length = 0;
 		        poslist.length = 0;
 				//0002.png,file:///F:/foozuu_works/png2fla-tool/copy/hero_2010006/spell/down/0002.png,-152.0,-135.0
-				var files_info_list = folders_cfg[folder].list;
+				var folder_cfg = folders_cfg[folder];
+				var files_info_list = folder_cfg.list;
 				var files_count = files_info_list.length;
 				for(var file_index=0; file_index < files_count; ++file_index)
 				{
@@ -120,7 +121,7 @@ function init()
 				createFolder(folder);
 				
 				importFiles(uirlist,folder);
-				addItemsToTimeLine(folder,item_name,nameslist,poslist,"start","end",2);
+				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval);
 			}
 			saveFlaAndPublish(SCRIPT_PATH+char_cfg.flaname+".fla");
 		}
