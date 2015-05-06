@@ -11,15 +11,27 @@
       "res",
       "label"
     ],
-    "join":"_",
+    "join": "_",
     "labels": {
       "spell": {
+        "ignor": 0,
         "start_suffix": "_start",
         "end_suffix": "_end"
       },
       "attack": {
+        "ignor": 0,
         "start_suffix": "_start",
         "end_suffix": "_end"
+      },
+      "idskill": {
+        "ignor": 1,
+        "start_suffix": "_appear_start",
+        "end_suffix": "_appear_end",
+        "insert": [
+          {
+            "end_suffix": "_fire_point"
+          }
+        ]
       }
     },
     "folders": {
@@ -30,7 +42,12 @@
         "interval": 1,
         "list": [],
         "start_label": "_start",
-        "end_label": "_end"
+        "end_label": "_end",
+        "instert": [
+          {
+            "frame": 0
+          }
+        ]
       },
       "spell/down": {
         "x": 0,
@@ -42,9 +59,7 @@
         "end_label": "_end",
         "instert": [
           {
-            "frame": 1,
-            "start_suffix": "_start",
-            "end_suffix": "_end"
+            "frame": 3
           }
         ]
       }

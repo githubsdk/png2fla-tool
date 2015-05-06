@@ -111,6 +111,8 @@ function init()
 				var folder_cfg = folders_cfg[folder];
 				var files_info_list = folder_cfg.list;
 				var files_count = files_info_list.length;
+				if(files_count==0)
+					continue;
 				for(var file_index=0; file_index < files_count; ++file_index)
 				{
 					var fileinfo = files_info_list[file_index];

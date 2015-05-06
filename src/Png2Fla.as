@@ -442,7 +442,7 @@ package
 			delete json["charfolder"];
 			
 			var ignor_folders:Array = save_data.ignor || [];
-			delete json.ignor;
+			delete json["ignor"];
 			
 			save_data.classname = charName;
 			save_data.flaname = charName;
@@ -481,7 +481,7 @@ package
 				}
 				files_cfg_obj.list = infos;
 				files_cfg_obj.interval = interval;
-				delete save_data.interva;
+				delete save_data["interva"];
 				
 				//label 
 				var start_label:String = "start";
@@ -489,6 +489,12 @@ package
 				var prefix:String = reverse_folder_names.join(save_data.join);
 				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
 				{
+					//忽略第一个文件夹
+					if(save_data.labels[first_folder].ignor>0)
+					{
+						reverse_folder_names.pop();
+						prefix = reverse_folder_names.join(save_data.join);
+					}
 					start_label = prefix+save_data.labels[first_folder].start_suffix;
 				}
 				var end_label:String = "end";
