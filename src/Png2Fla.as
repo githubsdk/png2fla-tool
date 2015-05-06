@@ -444,7 +444,8 @@ package
 			var ignor_folders:Array = save_data.ignor || [];
 			delete json["ignor"];
 			
-			save_data.classname = charName;
+			var classname:String = firstLetterUpcase(charName);
+			save_data.classname = classname;
 			save_data.flaname = charName;
 			//生成新的对象，赋值给folders
 			var files_info_obj:Object = save_data.folders;
@@ -504,59 +505,30 @@ package
 				}
 				files_cfg_obj.start_label = start_label;
 				files_cfg_obj.end_label = end_label;
+				
+				var insert_labels_array:Array = files_cfg_obj.insert;
+				if(insert_labels_array!=null && save_data.labels[first_folder]!=null)
+				{
+					var insert_labels_count:uint = insert_labels_array.length;
+					var common_insert:Array = save_data.labels[first_folder].insert;
+					for(var insert_count:int = 0; insert_count<insert_labels_count;++insert_count)
+					{
+						var insert_info:Object = insert_labels_array[insert_count];
+						if(insert_info.frame>0)
+						{
+							if(common_insert!=null && common_insert[insert_count]!=null)
+								insert_info.label = prefix+common_insert[insert_count].end_suffix
+						}
+					}
+				}
 			}
 			var content:String = JSON.stringify(json);
 			return json;
-			/*	
-				''								
-				+DQM+charName+DQM+':{										\
-		"folders":{													\
-			"hero_2010006/spell/down":{				\
-				"alias":"",											\
-				"interval":3,											\
-				"list":[													\
-					["0001.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0001.png","-56.0,-119.4"],\
-					["0002.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0002.png","-56.0,-119.4"]\
-				]															\
-			}																\
-		},																	\
-		"ignor":[														\
-			"special",												\
-			"auto",														\
-			"svn"														\
-			],																\
-		"interval":2,													\
-		"special_interval":{									\
-			"grave":1													\
-		},																	\
-		"name":"Role_100"									\
-		';									
-			*/
-			/**
-			 "role_100":{
-		"folders":{
-			"hero_2010006/spell/down":{
-				"alias":"",
-				"interval":3,
-				"list":[
-					["0001.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0001.png","-56.0,-119.4"],
-					["0002.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0002.png","-56.0,-119.4"]
-				]
-			}
-		},
-		"ignor":[
-			"special",
-			"auto",
-			"svn"
-			],
-		"interval":2,
-		"special_interval":{
-			"grave":1
-		},
-		"name":"Role_100"
-			
-			 */
-			return null;
+		}
+		
+		public static function firstLetterUpcase(str:String):String 
+		{ 
+			return str.charAt(0).toUpperCase()+str.substr(1).toLowerCase(); 
 		}
 		
 		/**

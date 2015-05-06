@@ -1,25 +1,72 @@
 {
-	"x":208,
-	"y":252.4,
-	"charfolder":{
-		"ignor":["special","auto","svn"],
-		"interval":2,
-		"special_interval":{
-			"grave":1,
-			"test":8
-		},
-		
-		
-		"folders":{
-			"hero_2010006/spell/down":{
-				"alias":"",
-				"interval":3,
-				"list":[]
-			}
-		},
-		
-		"classname":"",
-		"flaname":""
-
-	}
+  "x": 208,
+  "y": 252.4,
+  "charfolder": {
+    "ignor": [
+      "special",
+      "svn"
+    ],
+    "interval": 2,
+    "layers": [
+      "res",
+      "label"
+    ],
+    "join": "_",
+    "labels": {
+      "spell": {
+        "ignor": 0,
+        "start_suffix": "_start",
+        "end_suffix": "_end"
+      },
+      "attack": {
+        "ignor": 0,
+        "start_suffix": "_start",
+        "end_suffix": "_end"
+      },
+      "idskill": {
+        "ignor": 1,
+        "start_suffix": "_appear_start",
+        "end_suffix": "_appear_end",
+        "insert": [
+          {
+            "end_suffix": "_fire_point"
+          }
+        ]
+      }
+    },
+    "folders": {
+      "grave": {
+        "x": 10,
+        "y": 10,
+        "label": "gravestone",
+        "interval": 1,
+        "list": [],
+        "start_label": "_start",
+        "end_label": "_end",
+        "insert": [
+          {
+            "frame": 0,
+            "label": ""
+          }
+        ]
+      },
+      "idskill/30001/spell/down": {
+        "x": 0,
+        "y": 0,
+        "label": "",
+        "interval": 0,
+        "list": [],
+        "start_label": "_start",
+        "end_label": "_end",
+        "insert": [
+          {
+            "frame": 3,
+            "label": ""
+          }
+        ]
+      }
+    },
+    "classname": "",
+    "flaname": ""
+  }
 }
