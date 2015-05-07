@@ -3,6 +3,7 @@
     "x": 208,
     "y": 252.4,
     "interval": 2,
+    "fileinterval":2,
     "labels": {
       "30001": {
         "labeljoin": {

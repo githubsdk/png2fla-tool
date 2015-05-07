@@ -538,8 +538,11 @@ package
 				//除根目录以外的文件夹全路径
 				var keyname:String = action_name+"/"+direction_name;
 				
-				var name_reverse_list:Array = [direction_name, action_name];
-				
+				var name_reverse_list:Array = new Array();
+				if(direction_name!=null)
+					name_reverse_list.push(direction_name);
+				if(action_name!=null)
+					name_reverse_list.push(action_name);
 				var files_cfg_obj:Object = files_info_obj[keyname];
 				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
 				if(files_cfg_obj==null)
@@ -550,13 +553,15 @@ package
 				var count:uint = list.length;
 				var infos:Array = new Array();
 				//文件间隔，有的文件夹不需要全部图片都导入，如果无值，则赋值1，以防死循环
+				var file_interval:int = getCfgValue("fileinterval", action_name, direction_name, json);
+				//每张图片的帧数
 				var interval:int = getCfgValue("interval", action_name, direction_name, json);
 				interval ||= 1;
 				
 				var fire_poin_file:String = getCfgValue("firepointfile",action_name, direction_name, json);
 				var fire_poin_frame:int = 1;
 				//写入list内容
-				for (var file_index:int = 0; file_index < count; file_index+=interval)
+				for (var file_index:int = 0; file_index < count; file_index+=file_interval)
 				{
 					var fd:FileData = list[file_index];
 					if(fire_poin_file!=null && fire_poin_file.length>0 && fd.file.name.indexOf(fire_poin_file)>=0)
