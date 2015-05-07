@@ -125,7 +125,7 @@ function init()
 				importFiles(uirlist,folder);
 				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval,folder_cfg.insert);
 			}
-			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+".fla");
+			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla");
 		}
 		
 	}
@@ -166,6 +166,7 @@ function parsePublishInfo()
 
 function saveFlaAndPublish(savePath)
 {
+	trace(savePath)
 	fl.saveDocument(DOM , savePath);
 	DOM.publish();
 	fl.closeDocument(DOM);

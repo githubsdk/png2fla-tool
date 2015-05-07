@@ -25,7 +25,7 @@ package
 				var folders:Array = fullPath.split("/");
 				_actionName = folders[1];
 				_dirName = folders[2];
-				_rootName = folders[3];
+				_rootName = folders[0];
 			}
 		}
 

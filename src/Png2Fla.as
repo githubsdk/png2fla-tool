@@ -386,13 +386,14 @@ package
 		 * @return 
 		 * 
 		 */		
-		protected function getSavePath(path:String, url:Boolean=false):String
+		protected function getSavePath(path:String, url:Boolean=false, addName:String=null):String
 		{
 			var save_path:String = path;
+			var replace:String = addName==null ? IMAGE_SAVED_FOLDER : IMAGE_SAVED_FOLDER+"/"+addName;
 			if(url==false)
-				save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+				save_path = save_path.replace(_workingPath.name, replace);
 			else
-				save_path = save_path.replace(_workingPath.name, IMAGE_SAVED_FOLDER);
+				save_path = save_path.replace(_workingPath.name, replace);
 			return save_path;
 		}
 		
@@ -466,7 +467,7 @@ package
 			_bmp.y = fd.shiftY;
 
 			//保存处理过的图像
-			var save_path:String = getSavePath(image.nativePath);
+			var save_path:String = getSavePath(image.nativePath, false, fd.rootName);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
@@ -552,11 +553,17 @@ package
 				var interval:int = getCfgValue("interval", action_name, direction_name, json);
 				interval ||= 1;
 				
+				var fire_poin_file:String = getCfgValue("firepointfile",action_name, direction_name, json);
+				var fire_poin_frame:int = 1;
 				//写入list内容
 				for (var file_index:int = 0; file_index < count; file_index+=interval)
 				{
 					var fd:FileData = list[file_index];
-					infos.push([fd.file.name,getSavePath(fd.file.url,true),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+					if(fire_poin_file!=null && fire_poin_file.length>0 && fd.file.name.indexOf(fire_poin_file)>=0)
+					{
+						fire_poin_frame = file_index+1;
+					}
+					infos.push([fd.file.name,getSavePath(fd.file.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				files_cfg_obj.list = infos;
 				files_cfg_obj.interval = interval;
@@ -594,7 +601,10 @@ package
 				
 				var fire_point_suffix:String = getCfgValue("firepointsuffix",action_name, direction_name, json);
 				fire_point = fire_point+join + fire_point_suffix;
-				var fire_point_frame_cfg:Object = getCfgValue("firepointframe",action_name, direction_name, json);
+				
+				if(fire_poin_file!=null && fire_poin_file.length>0)
+					files_cfg_obj.insert = [{frame:fire_poin_frame,lable:fire_point}];
+				/*var fire_point_frame_cfg:Object = getCfgValue("firepointframe",action_name, direction_name, json);
 				if(fire_point_frame_cfg!=null && fire_point_frame_cfg[direction_name])
 				{
 					var insert_info:Object = new Object();
@@ -610,7 +620,7 @@ package
 					}
 					if(insert.length>0)
 						files_cfg_obj.insert = insert;
-				}
+				}*/
 			}
 			
 			delete save_data["labels"];

@@ -11,6 +11,7 @@
         },
         "startsuffix": "appear_start",
         "endsuffix": "appear_end",
+        "firepointfile":"0009",
         "firepointframe": {
           "up": {
             "frames": [
