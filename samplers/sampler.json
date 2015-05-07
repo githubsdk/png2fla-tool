@@ -1,0 +1,26 @@
+{
+
+	"role_100":{
+		"folders":{
+			"hero_2010006/spell/down":{
+				"alias":"",
+				"interval":3,
+				"list":[
+					["0001.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0001.png","-56.0,-119.4"],
+					["0002.png","file:///Users/Vector/work_shinezone/png2fla-tool/copy/hero_2010006/spell/down/0002.png","-56.0,-119.4"]
+				]
+			}
+		},
+		"ignor":[
+			"special",
+			"auto",
+			"svn"
+			],
+		"interval":2,
+		"special_interval":{
+			"grave":1
+		},
+		"name":"Role_100"
+
+	}
+}

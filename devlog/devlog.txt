@@ -1,0 +1,79 @@
+﻿-	进行中的
+√	已完成的
+
+
+-------------------------------------------
+2015年05月06日19:14:42
+、jsfl读入json并导入配置中的文件 √
+、完善配置模板，并在air中处理部分信息 √
+、考虑带id的技能特殊性 √
+、插入帧以及标签的完善 √
+、类名首字母大写 √
+、考虑简化带id技能的配置
+、多角色文件夹有严重问题 已修复 √
+、fla最后的保存路径 √
+
+2015年05月05日18:41:09
+、简化存储数据：import_config.txt修改为包含json模板的配置，根据此配置生成导出文件 √
+、拷贝jsfl文件需要更新为拷贝文件夹 √
+、jsfl脚本内的脚本路径需要修改 √
+
+2015年05月05日01:50:21
+、打开fla读入坐标信息	，根据保存到信息，调用准备好的接口把图片添加到舞台 √
+、文件处理跳过信息的处理
+、忽略文件夹的处理
+
+2015年5月1日22:34:34
+、基础的操作界面 	√
+、基础信息输出		√
+、图像载入，处理并保存到副本文件夹，提供简单预览	√  
+、保存上次的工作目录	√
+、记录新图像的坐标信息	√
+、把脚本复制到工作目录	√
+、获取当前脚本路径，以便接下来的自动化导入发布	√
+
+、按文件夹导入图片到fla，建立文件夹，导入时间线并加入标签名
+	下面的示例在名为 folderTwo 的新文件夹中创建名为 start 的新按钮项目：
+		fl.getDocumentDOM().library.addNewItem("button", "folderTwo/start");
+
+	-文件夹命名 √
+		下面的示例创建两个新的库文件夹。第二个文件夹是第一个文件夹的子文件夹： 
+			fl.getDocumentDOM().library.newFolder("first/second"); 
+
+	-导入该文件夹下所有文件 √
+		下面的示例将项目 Symbol_1 移动到库文件夹 new，然后替换该文件夹中的同名项目： 
+			fl.getDocumentDOM().library.moveToFolder("new", "Symbol_1", true); 
+
+	-按顺序添加到舞台并添加label √
+		下面的示例将位于库中 folder1 内的项目 Symbol1 添加到舞台的 (550, 485) 位置： 
+			fl.getDocumentDOM().library.addItemToDocument({x:550.0, y:485.0}, "folder1/Symbol1"); 
+
+、导出png的时候，由文件夹做索引，保存一份png文件路径列表，名字从小到大排列（该功能 要关联配置文件里的 起始文件序号和文件间隔）√
+、把文件夹结构格式化为下边结构 √
+
+-------------------------------------------
+
+http://help.adobe.com/zh_CN/flash/cs/extend/index.html
+
+标准：
+、子文件夹命名=frameLabel名字去后缀
+、root_xxxxxx
+	|-attack
+	|	|-up
+	|	|-upleft
+	|	|-upright
+	|	|-left
+	|	|-right
+	|	|-down
+	|	|-downleft
+	|	|-downright
+	|-idle
+	|	|-up
+	|	|-upleft
+	|	|-upright
+	|	|-left
+	|	|-right
+	|	|-down
+	|	|-downleft
+	|	|-downright
+
