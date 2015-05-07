@@ -195,7 +195,7 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 	{
 		var insert_frame = start_index+insert_label_info.frame-1;
 		timeline.convertToKeyframes(insert_frame);
-		timeline.setFrameProperty("name", insert_label_info.label, insert_frame);
+		timeline.setFrameProperty("name", insert_label_info.lable, insert_frame);
 	}
 		
 	timeline.setFrameProperty("name", startLabel, start_index);

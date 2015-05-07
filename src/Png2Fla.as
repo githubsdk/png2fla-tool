@@ -39,10 +39,6 @@ package
 		protected var _allFoundFiles:Dictionary;
 		protected var _allFoundFilesVec:Vector.<FileData>;
 		/**
-		 *输出文件的信息 
-		 */		
-		protected var _outPutFilsInfo:Dictionary;
-		/**
 		 *每个子文件夹下的文件 
 		 */		
 		protected var _filesInEveryFolder:Dictionary;
@@ -50,7 +46,10 @@ package
 		 *每个角色文件夹下的文件列表 
 		 */		
 		protected var _filesInCharFolder:Dictionary;
-		protected var _allCopyConfigs:Dictionary;
+		/**
+		 *路径做索引，保存每个根目录 import_config.txt 的内容
+		 */		
+		protected var _allImportConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
 		protected const CONFIG:String = "import_config.txt";
@@ -238,7 +237,6 @@ package
 			if(_loader==null)
 			{
 				_loader = new Loader();
-				//_panel.uiloader.source = _loader;
 			}
 
 			_panel.start.enabled = false;
@@ -250,12 +248,6 @@ package
 			}
 			_allFoundFiles = null;
 			_allFoundFiles = new Dictionary();
-			for (key in _outPutFilsInfo)
-			{
-				delete _outPutFilsInfo[key];
-			}
-			_outPutFilsInfo = null;
-			_outPutFilsInfo = new Dictionary();
 			for (key in _filesInEveryFolder)
 			{
 				delete _filesInEveryFolder[key];
@@ -270,12 +262,13 @@ package
 			_filesInCharFolder = null;
 			_filesInCharFolder = new Dictionary();
 			
-			_allCopyConfigs = new Dictionary();
+			_allImportConfigs = new Dictionary();
 			_allFoundFilesVec ||= new Vector.<FileData>();
 			_allFoundFilesVec.length = 0;
 			_bmp = new Bitmap();
 			addChild(_bmp);
 			
+			//需要查找的文件类型
 			var extentions:Array = new Array();
 			if(_panel.png.selected==true)
 				extentions.push(_panel.png.label);
@@ -289,9 +282,9 @@ package
 				if(char.isDirectory==false)
 					continue;
 				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
-				_allCopyConfigs[char.name] = readConfig(char);
+				_allImportConfigs[char.name] = readConfig(char);
 			}
-			//排序文件
+			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
 			for each(var folder_files_dic:Dictionary in _filesInEveryFolder)
 			{
 				for each(var vec:Vector.<FileData> in folder_files_dic)
@@ -302,20 +295,9 @@ package
 			}
 			log("本次处理文件数："+_allFoundFilesVec.length);
 			extentions = null;
+			//组个处理图像并保存
 			executeAllImage(_allFoundFilesVec.reverse(), onAllImagesDone);
 			return;
-			/*for each(var child:File in children)
-			{
-				if(child.isDirectory==false)
-					continue;
-				var cfg:File = child.resolvePath(CONFIG);
-				if(cfg.exists==true)
-				{
-					Debugger.log(child.url);
-				}else{
-					log("该目录下不存在必要的配置文件，请检查："+child.nativePath,"ff0000");
-				}
-			}*/
 		}
 		
 		/**
@@ -344,6 +326,7 @@ package
 		protected function onAllImagesDone(...args):void
 		{
 			updateState();
+			
 			var file:File = _workingPath.parent;
 			var content:String = "";
 			var jsons:Array = new Array();
@@ -353,6 +336,7 @@ package
 				jsons.push(json);
 			}
 			content = JSON.stringify(jsons);
+			
 			saveContent(file.resolvePath(IMAGE_POS_FILE), content);
 			
 			
@@ -364,9 +348,6 @@ package
 			_panel.uiloader.graphics.clear();
 			
 			copyAndRunTempleteFileAndJSFL();
-			return;
-			executeJSFL();
-			
 			return;
 		}
 		
@@ -408,6 +389,12 @@ package
 			file.openWithDefaultApplication();
 		}
 		
+		/**
+		 *组个处理一组图像文件
+		 * @param images
+		 * @param onDone
+		 * 
+		 */		
 		protected function executeAllImage(images:Vector.<FileData>, onDone:Function):void
 		{
 			if(images==null || images.length==0)
@@ -427,21 +414,13 @@ package
 				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
-				var cfg:Object = _allCopyConfigs[child.root.name];
-				var shift_x:Number = 0;
-				var shift_y:Number = 0;
-				if(cfg!=null)
-				{
-					shift_x = cfg.x;
-					shift_y = cfg.y;
-				}
+				var cfg:Object = _allImportConfigs[child.root.name];
+				var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
+				var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
 				executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
-				//addChild(_bmp);
-				//_panel.uiloader.source = _bmp;
 				_loader.unloadAndStop(true);
 				_loader.unload();
 				executeAllImage(images, onDone);
-			//	log(file.nativePath+" 完成。");
 			}
 		}
 		
@@ -459,6 +438,7 @@ package
 				return;
 			var image:File = fd.file;
 			var rect:Rectangle = getBitmapDataValidRect(source);
+			//这里虽然保存了偏移坐标，但只是一个预览用的
 			fd.shiftX =  rect.x-shiftX;
 			fd.shiftY =  rect.y-shiftY;
 			var dest:BitmapData = new BitmapData(rect.width, rect.height);
@@ -480,16 +460,6 @@ package
 			
 			//图像偏移量加入字符串
 			var fullpath:String = fd.fullPath;
-			var fileinfo:Array = _outPutFilsInfo[fullpath];
-			if(fileinfo==null)
-			{
-				_outPutFilsInfo[fullpath] = fileinfo = new Array();
-			}
-			/*
-				fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
-			fullpath[:]name[*]copyuil[*]x,y[?]name[*]copyuil[*]x,y[?]name[*]copyuil|x,y
-			*/
-			fileinfo.push(image.name+"[*]"+getSavePath(image.url,true)+"[*]"+fd.shiftX.toFixed(1)+","+fd.shiftY.toFixed(1));
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -503,36 +473,58 @@ package
 			_panel.uiloader.graphics.endFill();
 		}
 		
-		protected function generateSaveContent(charName:String, charFullPath:String):Object
+		/**
+		 *生成指定根目录下的文件信息 
+		 * @param rootName 根目录的名字
+		 * @param charFullPath
+		 * @return 
+		 * 
+		 */		
+		protected function generateSaveContent(rootName:String, charFullPath:String):Object
 		{
 			var folder_files_dic:Dictionary = _filesInEveryFolder[charFullPath];
 			var DQM:String = '"';
-			var first_up:String = charName;
-			var json:Object = _allCopyConfigs[charName];
+			var first_up:String = rootName;
+			var json:Object = _allImportConfigs[rootName];
+			//为防止修改原本内容，克隆出该对象
 			json = ObjectUtils.clone(json);
-			var save_data:Object = json[charName] = json["charfolder"];
-			delete json["charfolder"];
+			//将charfolder这个key替换成rootName以保证其唯一性
+			var save_data:Object = json[rootName] = json["charfolder"];
+			
 			
 			var ignor_folders:Array = save_data.ignor || [];
-			delete json["ignor"];
 			
-			var classname:String = firstLetterUpcase(charName);
+			var classname:String = rootName;
+			var namemap:Object = save_data.namemap;
+			if(namemap!=null)
+			{
+				for (var rp:String in namemap)
+				{
+					classname=classname.replace(rp,namemap[rp]);
+				}
+			}
+			classname = firstLetterUpcase(classname);
 			save_data.classname = classname;
-			save_data.flaname = charName;
-			delete save_data["x"];
-			delete save_data["y"];
+			save_data.flaname = rootName;
 			//生成新的对象，赋值给folders
 			var files_info_obj:Object = save_data.folders;
 			files_info_obj ||= new Object();
+			var labels_cfg:Object = save_data.labels;
+			
+			
 			for (var fullname:String in folder_files_dic)
 			{
-				//文件夹key值
-				var keyname:String = fullname.replace(charName+"/","");
-				var folder_names_list:Array = keyname.split("/");
-				var first_folder:String = folder_names_list[0];
-				//忽略文件夹跳过
-				if(ignor_folders.indexOf(first_folder)>=0)
-					continue;
+				var folders_names_list:Array = fullname.split("/");
+				
+				//方向
+				var direction_name:String = folders_names_list[2];
+				//文件夹名称，比如 walk far near 以及用技能id命名的
+				var action_name:String = folders_names_list[1];
+				//除根目录以外的文件夹全路径
+				var keyname:String = action_name+"/"+direction_name;
+				
+				var name_reverse_list:Array = [direction_name, action_name];
+				
 				var files_cfg_obj:Object = files_info_obj[keyname];
 				//这里不管是否有配置，都只需要加入新的list信息，不配置就代表不需要
 				if(files_cfg_obj==null)
@@ -543,64 +535,117 @@ package
 				var count:uint = list.length;
 				var infos:Array = new Array();
 				//文件间隔，有的文件夹不需要全部图片都导入，如果无值，则赋值1，以防死循环
-				var interval:int = files_cfg_obj.interval;
-				if(interval==0)
-				{
-					interval = save_data.interval || 1;
-				}
+				var interval:int = getCfgValue("interval", action_name, direction_name, json);
+				interval ||= 1;
+				
 				//写入list内容
-				for (var i:int = 0; i < count; i+=interval)
+				for (var file_index:int = 0; file_index < count; file_index+=interval)
 				{
-					var fd:FileData = list[i];
+					var fd:FileData = list[file_index];
 					infos.push([fd.file.name,getSavePath(fd.file.url,true),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				files_cfg_obj.list = infos;
 				files_cfg_obj.interval = interval;
-				delete save_data["interva"];
 				
 				//label 
-				var start_label:String = "start";
-				var reverse_folder_names:Array = folder_names_list.reverse();
-				var prefix:String = reverse_folder_names.join(save_data.join);
-				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
-				{
-					//忽略第一个文件夹
-					if(save_data.labels[first_folder].ignor>0)
-					{
-						reverse_folder_names.pop();
-						prefix = reverse_folder_names.join(save_data.join);
-					}
-					start_label = prefix+save_data.labels[first_folder].startsuffix;
-				}
-				var end_label:String = "end";
-				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
-				{
-					end_label = prefix+save_data.labels[first_folder].end_suffix;
-				}
-				files_cfg_obj.start_label = start_label;
-				files_cfg_obj.end_label = end_label;
+				var prefix:String = "";
+				var fire_point:String = "";
 				
-				var insert_labels_array:Array = files_cfg_obj.insert;
-				if(insert_labels_array!=null && save_data.labels[first_folder]!=null)
+				var label_join_cfg:Object = getCfgValue("labeljoin",action_name, direction_name, json);
+				var join:String = getCfgValue("join",action_name, direction_name, json);
+				
+				var name_rewerse_count:uint = name_reverse_list.length;
+				for (var name_index:uint=0;name_index<name_rewerse_count;++name_index)
 				{
-					var insert_labels_count:uint = insert_labels_array.length;
-					var common_insert:Array = save_data.labels[first_folder].insert;
-					for(var insert_count:int = 0; insert_count<insert_labels_count;++insert_count)
+					if(label_join_cfg!=null && label_join_cfg.nameindex==name_index && label_join_cfg.label!=null && label_join_cfg.label!="")
 					{
-						var insert_info:Object = insert_labels_array[insert_count];
-						if(insert_info.frame>0)
+						if(prefix.length>0)
+							prefix += join;
+						prefix +=  label_join_cfg.label;
+						if(fire_point.length>0)
+							fire_point += join;
+						fire_point += label_join_cfg.label;
+					}
+					if(prefix.length>0)
+						prefix += join;
+					prefix += name_reverse_list[name_index];
+					if(fire_point.length>0)
+						fire_point += join;
+					fire_point += name_reverse_list[name_index];
+				}
+				var start_suffix:String = getCfgValue("startsuffix",action_name, direction_name, json);
+				var end_suffix:String = getCfgValue("endsuffix",action_name, direction_name, json);
+				files_cfg_obj.start_label = prefix + join + start_suffix;
+				files_cfg_obj.end_label = prefix + join + end_suffix;
+				
+				var fire_point_suffix:String = getCfgValue("firepointsuffix",action_name, direction_name, json);
+				fire_point = fire_point+join + fire_point_suffix;
+				var fire_point_frame_cfg:Object = getCfgValue("firepointframe",action_name, direction_name, json);
+				if(fire_point_frame_cfg!=null && fire_point_frame_cfg[direction_name])
+				{
+					var insert_info:Object = new Object();
+					insert_info.label = fire_point;
+					var frames_cfg:Array = fire_point_frame_cfg[direction_name].frames;
+					var insert:Array = new Array();
+					if(frames_cfg)
+					{
+						for each(var frameindex:uint in frames_cfg)
 						{
-							if(common_insert!=null && common_insert[insert_count]!=null)
-								insert_info.label = prefix+common_insert[insert_count].end_suffix
+							insert.push({frame:frameindex,lable:fire_point});
 						}
 					}
+					if(insert.length>0)
+						files_cfg_obj.insert = insert;
 				}
 			}
+			
+			delete save_data["labels"];
+			delete save_data["x"];
+			delete save_data["y"];
+			delete save_data["startsuffix"];
+			delete save_data["startsuffix"];
+			delete save_data["endsuffix"];
+			delete save_data["join"];
+			delete save_data["namemap"];
+			delete save_data["ignor"];
+			delete save_data["interval"];
+			delete save_data["firepointsuffix"];
+			delete save_data["ignor"];
+			delete save_data["charfolder"];
+			delete json["charfolder"];
+			
 			var content:String = JSON.stringify(json);
 			return json;
 		}
 		
-		public static function firstLetterUpcase(str:String):String 
+		/**
+		 *查询指定的属性，如果labels中没有配置特殊的，则使用全局配置  
+		 * @param property
+		 * @param actionName
+		 * @param dirName
+		 * @param globalCfg
+		 * @return 
+		 * 
+		 */		
+		protected function getCfgValue(property:String,actionName:String, dirName:String,globalCfg:Object):*
+		{
+			if(globalCfg!=null && globalCfg.charfolder!=null)
+			{
+				var labels_cfg:Object = globalCfg.charfolder.labels;
+				if(labels_cfg!=null)
+				{
+					var action_cfg:Object = labels_cfg[actionName];
+					if(action_cfg.hasOwnProperty(property)==true)
+						return action_cfg[property];
+				}
+				return globalCfg.charfolder[property];
+			}
+		
+			return null;
+		}
+		
+		//首字母大写
+		protected function firstLetterUpcase(str:String):String 
 		{ 
 			return str.charAt(0).toUpperCase()+str.substr(1).toLowerCase(); 
 		}
