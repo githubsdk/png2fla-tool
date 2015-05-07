@@ -144,6 +144,20 @@ package
 		{
 			switch(event.target)
 			{
+				case _panel.open_path:
+				{
+					_workingPath.openWithDefaultApplication();
+					break;
+				}
+				case _panel.default_addons:
+				{
+					_addons = ADDONS;
+					var addonfile:File = addonsFile;
+					_addons = addonfile.url;
+					_saveData.addons = _addons;
+					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), JSON.stringify(_saveData));
+					break;
+				}
 				case _panel.addons:
 				{
 					selectAddonsPath();
@@ -221,7 +235,7 @@ package
 			var addons:File;
 			if(_addons==ADDONS)
 			{
-				addons = File.applicationDirectory.resolvePath(_addons);
+				addons = File.applicationDirectory.resolvePath(_addons+"/"+CONFIG);
 			}else{
 				addons = new File(_addons);
 			}
@@ -635,7 +649,7 @@ package
 				if(labels_cfg!=null)
 				{
 					var action_cfg:Object = labels_cfg[actionName];
-					if(action_cfg.hasOwnProperty(property)==true)
+					if(action_cfg!=null && action_cfg.hasOwnProperty(property)==true)
 						return action_cfg[property];
 				}
 				return globalCfg.charfolder[property];
@@ -764,6 +778,7 @@ package
 			_panel.start.enabled = _workingPath!=null && (_allFoundFilesVec==null || _allFoundFilesVec.length==0);
 			_panel.current_path.text = _workingPath==null ? "请选择工作目录":_workingPath.nativePath;
 			_panel.addons_path.text = _saveData.addons==null ? _panel.addons_path.text : _saveData.addons;
+			_panel.open_path.enabled = _workingPath!=null;
 		}
 	
 		/**
