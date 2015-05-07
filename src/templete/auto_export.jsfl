@@ -125,7 +125,7 @@ function init()
 				importFiles(uirlist,folder);
 				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval,folder_cfg.insert);
 			}
-			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla");
+			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla",char_cfg.flaname);
 		}
 		
 	}
@@ -164,9 +164,19 @@ function parsePublishInfo()
 	}
 }
 
-function saveFlaAndPublish(savePath)
+function saveFlaAndPublish(savePath,fileName)
 {
-	trace(savePath)
+	//修改发布配置，把文件发布到上级目录 
+	var profile = DOM.exportPublishProfileString();
+
+	profile = profile.replace("<flashDefaultName>1</flashDefaultName>", "<flashDefaultName>0</flashDefaultName>");
+	profile = profile.replace("<defaultNames>1</defaultNames>", "<defaultNames>0</defaultNames>");
+	while(profile.indexOf(NAME)!=-1)
+	{
+		profile = profile.replace(NAME, "../"+fileName);
+	}
+	trace(profile)
+	DOM.importPublishProfileString(profile);
 	fl.saveDocument(DOM , savePath);
 	DOM.publish();
 	fl.closeDocument(DOM);

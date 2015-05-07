@@ -536,7 +536,9 @@ package
 				//文件夹名称，比如 walk far near 以及用技能id命名的
 				var action_name:String = folders_names_list[1];
 				//除根目录以外的文件夹全路径
-				var keyname:String = action_name+"/"+direction_name;
+				var keyname:String = action_name;
+				if(direction_name!=null)
+					keyname+="/"+direction_name;
 				
 				var name_reverse_list:Array = new Array();
 				if(direction_name!=null)
