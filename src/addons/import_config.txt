@@ -1,0 +1,140 @@
+{
+  "charfolder": {
+    "x": 208,
+    "y": 252.4,
+    "interval": 2,
+    "labels": {
+      "30001": {
+        "labeljoin": {
+          "nameindex": 1,
+          "label": "spell"
+        },
+        "startsuffix": "_appear_start",
+        "endsuffix": "_appear_end",
+        "insert": {
+          "up": {
+            "frame": 3
+          },
+          "down": {
+            "frame": 3
+          },
+          "left": {
+            "frame": 3
+          },
+          "right": {
+            "frame": 3
+          },
+          "upleft": {
+            "frame": 3
+          },
+          "upright": {
+            "frame": 3
+          },
+          "downleft": {
+            "frame": 3
+          },
+          "downright": {
+            "frame": 3
+          }
+        }
+      },
+      "far": {
+        "startsuffix": "_attack_start",
+        "endsuffix": "_attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        },
+        "insert": {
+          "up": {
+            "frame": 3
+          },
+          "down": {
+            "frame": 3
+          },
+          "left": {
+            "frame": 3
+          },
+          "right": {
+            "frame": 3
+          },
+          "upleft": {
+            "frame": 3
+          },
+          "upright": {
+            "frame": 3
+          },
+          "downleft": {
+            "frame": 3
+          },
+          "downright": {
+            "frame": 3
+          }
+        }
+      },
+      "near": {
+        "startsuffix": "_attack_start",
+        "endsuffix": "_attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        },
+        "insert": {
+          "up": {
+            "frame": 3
+          },
+          "down": {
+            "frame": 3
+          },
+          "left": {
+            "frame": 3
+          },
+          "right": {
+            "frame": 3
+          },
+          "upleft": {
+            "frame": 3
+          },
+          "upright": {
+            "frame": 3
+          },
+          "downleft": {
+            "frame": 3
+          },
+          "downright": {
+            "frame": 3
+          }
+        }
+      },
+      "idle": {},
+      "walk": {},
+      "grave": {
+        "x": 10,
+        "y": 10,
+        "label": "grave",
+        "intreval": 1
+      }
+    },
+    "folders": {},
+    "classname": "",
+    "flaname": "",
+    "layers": [
+      "reslayer",
+      "labellayer"
+    ],
+    "ignor": [
+      "special",
+      "svn"
+    ],
+    "startsuffix": "_start",
+    "endsuffix": "_end",
+    "fire_point": "_fire_point",
+    "join": "_",
+    "namemap": {
+      "dieeffect_": "DieEffect_",
+      "groundeffect_": "GroundEffect_",
+      "organismskillbuffer_": "OrganismSkillBuffer_",
+      "magicskill_": "MagicSkill_"
+    }
+  }
+}

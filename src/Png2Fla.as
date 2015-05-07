@@ -6,7 +6,6 @@ package
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Loader;
 	import flash.display.PNGEncoderOptions;
-	import flash.display.PixelSnapping;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -18,6 +17,7 @@ package
 	import flash.filesystem.FileStream;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.net.FileFilter;
 	import flash.net.URLRequest;
 	import flash.text.TextFormat;
 	import flash.utils.ByteArray;
@@ -68,6 +68,13 @@ package
 		
 		protected var _bmd:BitmapData;
 		
+		protected const ADDONS:String="addons";
+		protected var _addons:String;
+		/**
+		 *工具保存数据 
+		 */		
+		protected var _saveData:Object;
+		
 		/**
 		 *新的图像保存位置 
 		 */		
@@ -89,10 +96,13 @@ package
 			_panel.copy_progress.minimum = 0;
 			_panel.copy_progress.maximum = 1;
 			
-			var cfg:String = '{"x":"10","y":"200"}';
-			var o:Object = JSON.parse(cfg);
-			
-			var last_path:String = readLastPath(TOOL_DATA_FILE);
+			_saveData = readLastPath(TOOL_DATA_FILE);
+			var last_path:String = _saveData.path;
+			_addons = _saveData.addons;
+			if(_addons==null || _addons.length==0)
+			{
+				_addons = ADDONS;
+			}
 			if(last_path!=null)
 			{
 				_workingPath = new File(last_path);
@@ -135,6 +145,11 @@ package
 		{
 			switch(event.target)
 			{
+				case _panel.addons:
+				{
+					selectAddonsPath();
+					break;
+				}
 				case _panel.jsfl:
 				{
 					copyAndRunTempleteFileAndJSFL();
@@ -152,18 +167,73 @@ package
 				}
 				case _panel.copy_config:
 				{
-					var source:File = File.applicationDirectory.resolvePath("templete/"+CONFIG);
+					var source:File = addonsFile;
 					copyConfig(source, CONFIG, _workingPath.getDirectoryListing(),updateState,_panel.override_copy.selected);
 					break;
 				}
 			}
 		}
 		
+		/**
+		 *选择自定义的模板目录并保存 
+		 * 
+		 */		
+		private function selectAddonsPath():void
+		{
+			var dir:File = File.applicationDirectory;
+			dir.browseForOpen("选择模板文件:",[new FileFilter("文本文件","*.txt;*.json")]);
+			dir.addEventListener(Event.SELECT, onAddonsPathSelected);
+			dir.addEventListener(Event.CANCEL, onAddonsPathSelected);
+		}
+
+		protected function onAddonsPathSelected(event:Event):void
+		{
+			var dir:File = File.desktopDirectory;
+			dir.removeEventListener(Event.SELECT, onWorkingPathSelected);
+			dir.removeEventListener(Event.CANCEL, onWorkingPathSelected);
+			var addonfile:File = event.target as File;
+			
+			switch(event.type)
+			{
+				case Event.CANCEL:
+				{
+					break;
+				}
+				case Event.SELECT:
+				{
+					_addons = addonfile.url;
+					_saveData.addons = _addons;
+					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), JSON.stringify(_saveData));
+					break;
+				}
+			}
+			updateState();
+		}
+		
+		
+		
+		/**
+		 *模板文件目录 
+		 * @return 
+		 * 
+		 */		
+		protected function get addonsFile():File
+		{
+			var addons:File;
+			if(_addons==ADDONS)
+			{
+				addons = File.applicationDirectory.resolvePath(_addons);
+			}else{
+				addons = new File(_addons);
+			}
+			return addons;
+		}
+		
 		protected function start():void
 		{
 			if(_workingPath==null)
 				return;
-			log("========开始导图","00ff00");
+			log("开始导图","00ff00");
 			
 			if(_loader==null)
 			{
@@ -291,6 +361,7 @@ package
 				_bmp.parent.removeChild(_bmp);
 				_bmp.bitmapData.dispose();
 			}
+			_panel.uiloader.graphics.clear();
 			
 			copyAndRunTempleteFileAndJSFL();
 			return;
@@ -439,8 +510,6 @@ package
 			var first_up:String = charName;
 			var json:Object = _allCopyConfigs[charName];
 			json = ObjectUtils.clone(json);
-			delete json["x"];
-			delete json["y"];
 			var save_data:Object = json[charName] = json["charfolder"];
 			delete json["charfolder"];
 			
@@ -450,6 +519,8 @@ package
 			var classname:String = firstLetterUpcase(charName);
 			save_data.classname = classname;
 			save_data.flaname = charName;
+			delete save_data["x"];
+			delete save_data["y"];
 			//生成新的对象，赋值给folders
 			var files_info_obj:Object = save_data.folders;
 			files_info_obj ||= new Object();
@@ -499,7 +570,7 @@ package
 						reverse_folder_names.pop();
 						prefix = reverse_folder_names.join(save_data.join);
 					}
-					start_label = prefix+save_data.labels[first_folder].start_suffix;
+					start_label = prefix+save_data.labels[first_folder].startsuffix;
 				}
 				var end_label:String = "end";
 				if(save_data.labels!=null && save_data.labels[first_folder]!=null)
@@ -608,7 +679,7 @@ package
 			var child:File = children.pop();
 			if(child==null)
 				return;
-			var dest:File = child.resolvePath(destPath);
+			var dest:File = destPath==null ? child : child.resolvePath(destPath);
 			if(child.isDirectory==true)
 			{
 				Debugger.log(child.nativePath);
@@ -647,6 +718,7 @@ package
 			_panel.override_copy.enabled = _workingPath!=null;
 			_panel.start.enabled = _workingPath!=null && (_allFoundFilesVec==null || _allFoundFilesVec.length==0);
 			_panel.current_path.text = _workingPath==null ? "请选择工作目录":_workingPath.nativePath;
+			_panel.addons_path.text = _saveData.addons==null ? _panel.addons_path.text : _saveData.addons;
 		}
 	
 		/**
@@ -682,7 +754,8 @@ package
 				}
 				case Event.SELECT:
 				{
-					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), '{"path":"'+_workingPath.url+'"}');
+					_saveData.path = _workingPath.url;
+					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), JSON.stringify(_saveData));
 					break;
 				}
 			}
@@ -705,14 +778,14 @@ package
 		
 		protected function testBitmapData():void
 		{
-			var bmd:BitmapData = new Test()//new BitmapData(100,100,true,0x00ffffff);
+			/*var bmd:BitmapData = new Test()//new BitmapData(100,100,true,0x00ffffff);
 			bmd.fillRect( new Rectangle(20,20,60,60), 0xffffff00);
 			var bmp:Bitmap = new Bitmap(bmd, PixelSnapping.AUTO, true);
 			addChild(bmp);
 			var rect:Rectangle = getBitmapDataValidRect(bmd);
 			graphics.beginFill(0xff00ff);
 			graphics.drawRect(rect.x, rect.y, rect.width, rect.height);
-			graphics.endFill();
+			graphics.endFill();*/
 		}
 		
 		//"assets/icon.png"
@@ -753,7 +826,13 @@ package
 			_fileStream.close();
 		}
 		
-		private function readLastPath(fileName:String):String
+		/**
+		 *读取上次的工作目录 
+		 * @param fileName
+		 * @return 
+		 * 
+		 */		
+		private function readLastPath(fileName:String):Object
 		{
 			var path:String = null;
 			_fileStream = new FileStream();
@@ -774,10 +853,10 @@ package
 			if(path!=null)
 			{
 				var json:Object = JSON.parse(path);
-				path = json.path;
+				return json;
 			}
 			
-			return path;
+			return new Object();
 		}
 		
 		
