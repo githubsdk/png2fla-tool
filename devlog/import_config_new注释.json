@@ -1,0 +1,215 @@
+{
+  "charfolder": {
+    //本文件夹内通用的x，y偏移坐标
+    "x": 208,
+    "y": 252.4,
+    //全局使用的帧间隔，及每张图片占用的帧数，该数值也用来跳过图片，即每间隔interval数量的图片才导入一次库
+    "interval": 2,
+
+    //个性化配置
+    /*
+      root
+        |-hero_1
+              |-walk idle far near 30001 grave
+                  |-up down
+      
+    */
+    "labels": {
+      //需要技能id的动作，直接使用该技能id作为文件夹，子目录为8方向
+      "30001": {
+        //标签个性化.由于部分标签和通用规则不一样，因此引入该配置。不需要则不配置。
+        //以 up_spell_30001_appear_start 为例
+        "labeljoin": {
+          //表示连接生成标签名的时候，在第1个位置插入 label 配置的字符
+          "nameindex": 1,
+          "label": "spell"
+        },
+        //标签个性化。标签的结束字符，和通用规则不一样的在这里配置。不需要则不配置。
+        "startsuffix": "appear_start",
+        "endsuffix": "appear_end",
+        //firepoint 个性化。此配置中，有8方向，每个方向上的firepoint位置可能不一样，故单独配置。
+        //如不需要firepoint，需删除本条。
+        "firepointframe": {
+          "up": {
+            "frames": [
+              3
+            ]
+          },
+          "down": {
+            "frames": [
+              3
+            ]
+          },
+          "left": {
+            "frames": [
+              3
+            ]
+          },
+          "right": {
+            "frames": [
+              3
+            ]
+          },
+          "upleft": {
+            "frames": [
+              3
+            ]
+          },
+          "upright": {
+            "frames": [
+              3
+            ]
+          },
+          "downleft": {
+            "frames": [
+              3
+            ]
+          },
+          "downright": {
+            "frames": [
+              3
+            ]
+          }
+        }
+      },
+      "far": {
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        },
+        "firepointframe": {
+          "up": {
+            "frames": [
+              3
+            ]
+          },
+          "down": {
+            "frames": [
+              3
+            ]
+          },
+          "left": {
+            "frames": [
+              3
+            ]
+          },
+          "right": {
+            "frames": [
+              3
+            ]
+          },
+          "upleft": {
+            "frames": [
+              3
+            ]
+          },
+          "upright": {
+            "frames": [
+              3
+            ]
+          },
+          "downleft": {
+            "frames": [
+              3
+            ]
+          },
+          "downright": {
+            "frames": [
+              3
+            ]
+          }
+        }
+      },
+      "near": {
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        },
+        "firepointframe": {
+          "up": {
+            "frames": [
+              3
+            ]
+          },
+          "down": {
+            "frames": [
+              3
+            ]
+          },
+          "left": {
+            "frames": [
+              3
+            ]
+          },
+          "right": {
+            "frames": [
+              3
+            ]
+          },
+          "upleft": {
+            "frames": [
+              3
+            ]
+          },
+          "upright": {
+            "frames": [
+              3
+            ]
+          },
+          "downleft": {
+            "frames": [
+              3
+            ]
+          },
+          "downright": {
+            "frames": [
+              3
+            ]
+          }
+        }
+      },
+      "idle": {},
+      "walk": {},
+      //英雄需要的墓碑，特殊文件夹，如果需要墓碑文件，则把grave目录手动拷贝到图片文件夹下。
+      "grave": {
+        "x": 10,
+        "y": 10,
+        "label": "grave",
+        "intreval": 1
+      }
+    },
+    "folders": {},
+    //原件的类名，由程序生成不需要配置
+    "classname": "",
+    //保存fla的名字，由程序生成不需要配置
+    "flaname": "",
+    //fla中需要建立的层名字，越靠后的层，在时间轴上出现的越靠上
+    "layers": [
+      "reslayer",
+      "labellayer"
+    ],
+    //本文件夹内，全局忽略的子文件夹
+    "ignor": [
+      "special",
+      "svn"
+    ],
+    //该目录的起始、结束标签的后缀名
+    "startsuffix": "start",
+    "endsuffix": "end",
+    //firepoint标签后缀名
+    "firepointsuffix": "fire_point",
+    //label组合连接符
+    "join": "_",
+    //多字符需要大写的原件名，把全部小写的名字写在冒号前边，大写以后的名字卸载后边
+    "namemap": {
+      "dieeffect_": "DieEffect_",
+      "groundeffect_": "GroundEffect_",
+      "organismskillbuffer_": "OrganismSkillBuffer_",
+      "magicskill_": "MagicSkill_"
+    }
+  }
+}
