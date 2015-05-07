@@ -579,38 +579,46 @@ package
 				var prefix:String = "";
 				var fire_point:String = "";
 				
-				var label_join_cfg:Object = getCfgValue("labeljoin",action_name, direction_name, json);
-				var join:String = getCfgValue("join",action_name, direction_name, json);
-				
-				var name_rewerse_count:uint = name_reverse_list.length;
-				for (var name_index:uint=0;name_index<name_rewerse_count;++name_index)
+				var label:String = getCfgValue("label",action_name, direction_name, json);
+				if(label!=null && label.length>0)
 				{
-					if(label_join_cfg!=null && label_join_cfg.nameindex==name_index && label_join_cfg.label!=null && label_join_cfg.label!="")
+					files_cfg_obj.start_label = label;
+					files_cfg_obj.end_label = label;
+				}else{
+					var label_join_cfg:Object = getCfgValue("labeljoin",action_name, direction_name, json);
+					var join:String = getCfgValue("join",action_name, direction_name, json);
+					
+					var name_rewerse_count:uint = name_reverse_list.length;
+					for (var name_index:uint=0;name_index<name_rewerse_count;++name_index)
 					{
+						if(label_join_cfg!=null && label_join_cfg.nameindex==name_index && label_join_cfg.label!=null && label_join_cfg.label!="")
+						{
+							if(prefix.length>0)
+								prefix += join;
+							prefix +=  label_join_cfg.label;
+							if(fire_point.length>0)
+								fire_point += join;
+							fire_point += label_join_cfg.label;
+						}
 						if(prefix.length>0)
 							prefix += join;
-						prefix +=  label_join_cfg.label;
+						prefix += name_reverse_list[name_index];
 						if(fire_point.length>0)
 							fire_point += join;
-						fire_point += label_join_cfg.label;
+						fire_point += name_reverse_list[name_index];
 					}
-					if(prefix.length>0)
-						prefix += join;
-					prefix += name_reverse_list[name_index];
-					if(fire_point.length>0)
-						fire_point += join;
-					fire_point += name_reverse_list[name_index];
+					var start_suffix:String = getCfgValue("startsuffix",action_name, direction_name, json);
+					var end_suffix:String = getCfgValue("endsuffix",action_name, direction_name, json);
+					files_cfg_obj.start_label = prefix + join + start_suffix;
+					files_cfg_obj.end_label = prefix + join + end_suffix;
+					
+					var fire_point_suffix:String = getCfgValue("firepointsuffix",action_name, direction_name, json);
+					fire_point = fire_point+join + fire_point_suffix;
+					
+					if(fire_poin_file!=null && fire_poin_file.length>0)
+						files_cfg_obj.insert = [{frame:fire_poin_frame,lable:fire_point}];
 				}
-				var start_suffix:String = getCfgValue("startsuffix",action_name, direction_name, json);
-				var end_suffix:String = getCfgValue("endsuffix",action_name, direction_name, json);
-				files_cfg_obj.start_label = prefix + join + start_suffix;
-				files_cfg_obj.end_label = prefix + join + end_suffix;
 				
-				var fire_point_suffix:String = getCfgValue("firepointsuffix",action_name, direction_name, json);
-				fire_point = fire_point+join + fire_point_suffix;
-				
-				if(fire_poin_file!=null && fire_poin_file.length>0)
-					files_cfg_obj.insert = [{frame:fire_poin_frame,lable:fire_point}];
 				/*var fire_point_frame_cfg:Object = getCfgValue("firepointframe",action_name, direction_name, json);
 				if(fire_point_frame_cfg!=null && fire_point_frame_cfg[direction_name])
 				{

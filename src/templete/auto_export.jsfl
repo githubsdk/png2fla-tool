@@ -125,6 +125,7 @@ function init()
 				importFiles(uirlist,folder);
 				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval,folder_cfg.insert);
 			}
+
 			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla",char_cfg.flaname);
 		}
 		
@@ -199,7 +200,9 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 	var dest_index = start_index + add_frames - 1;
 	timeline.currentLayer=0;
 	
-	timeline.insertBlankKeyframe(dest_index);
+	if(dest_index!=start_index)
+		timeline.insertBlankKeyframe(dest_index);
+
 	if(start_index!=0)
 		timeline.convertToKeyframes(start_index);
 	for each(var insert_label_info in indertLabels)
@@ -208,7 +211,6 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 		timeline.convertToKeyframes(insert_frame);
 		timeline.setFrameProperty("name", insert_label_info.lable, insert_frame);
 	}
-		
 	timeline.setFrameProperty("name", startLabel, start_index);
 	timeline.setFrameProperty("name", endLabel, dest_index);
 	
