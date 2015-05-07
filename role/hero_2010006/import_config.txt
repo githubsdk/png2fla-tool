@@ -3,156 +3,33 @@
     "x": 208,
     "y": 252.4,
     "interval": 2,
+    "fileinterval": 2,
     "labels": {
       "30001": {
+        "firepointfile": "0009",
         "labeljoin": {
           "nameindex": 1,
           "label": "spell"
         },
         "startsuffix": "appear_start",
-        "endsuffix": "appear_end",
-        "firepointfile":"0009",
-        "firepointframe": {
-          "up": {
-            "frames": [
-              3
-            ]
-          },
-          "down": {
-            "frames": [
-              3
-            ]
-          },
-          "left": {
-            "frames": [
-              3
-            ]
-          },
-          "right": {
-            "frames": [
-              3
-            ]
-          },
-          "upleft": {
-            "frames": [
-              3
-            ]
-          },
-          "upright": {
-            "frames": [
-              3
-            ]
-          },
-          "downleft": {
-            "frames": [
-              3
-            ]
-          },
-          "downright": {
-            "frames": [
-              3
-            ]
-          }
-        }
+        "endsuffix": "appear_end"
       },
       "far": {
+        "firepointfile": "0009",
         "startsuffix": "attack_start",
         "endsuffix": "attack_end",
         "labeljoin": {
           "nameindex": 2,
           "label": ""
-        },
-        "firepointframe": {
-          "up": {
-            "frames": [
-              3
-            ]
-          },
-          "down": {
-            "frames": [
-              3
-            ]
-          },
-          "left": {
-            "frames": [
-              3
-            ]
-          },
-          "right": {
-            "frames": [
-              3
-            ]
-          },
-          "upleft": {
-            "frames": [
-              3
-            ]
-          },
-          "upright": {
-            "frames": [
-              3
-            ]
-          },
-          "downleft": {
-            "frames": [
-              3
-            ]
-          },
-          "downright": {
-            "frames": [
-              3
-            ]
-          }
         }
       },
       "near": {
+        "firepointfile": "0009",
         "startsuffix": "attack_start",
         "endsuffix": "attack_end",
         "labeljoin": {
           "nameindex": 2,
           "label": ""
-        },
-        "firepointframe": {
-          "up": {
-            "frames": [
-              3
-            ]
-          },
-          "down": {
-            "frames": [
-              3
-            ]
-          },
-          "left": {
-            "frames": [
-              3
-            ]
-          },
-          "right": {
-            "frames": [
-              3
-            ]
-          },
-          "upleft": {
-            "frames": [
-              3
-            ]
-          },
-          "upright": {
-            "frames": [
-              3
-            ]
-          },
-          "downleft": {
-            "frames": [
-              3
-            ]
-          },
-          "downright": {
-            "frames": [
-              3
-            ]
-          }
         }
       },
       "idle": {},
@@ -161,7 +38,7 @@
         "x": 10,
         "y": 10,
         "label": "grave",
-        "intreval": 1
+        "interval": 1
       }
     },
     "folders": {},
