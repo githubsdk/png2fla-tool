@@ -156,6 +156,7 @@ package
 					_addons = addonfile.url;
 					_saveData.addons = _addons;
 					saveContent(TOOL_DATA_SAVE.resolvePath(TOOL_DATA_FILE), JSON.stringify(_saveData));
+					updateState();
 					break;
 				}
 				case _panel.addons:
