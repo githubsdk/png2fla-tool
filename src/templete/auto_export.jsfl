@@ -1,6 +1,5 @@
 ﻿/************************************************
-合并文件里的指定帧到muban.fla
-并且将muban中的内容导出png图片到指定文件夹
+
 *************************************************/
 
 //资源停到的帧 
@@ -40,7 +39,7 @@ var SCRIPT_PATH = getFolderPath(fl.scriptURI,1);
 
 var WORKING_PATH = getFolderPath(SCRIPT_PATH,2);
 
-var OUT_PUT_CONTENT = FLfile.read(WORKING_PATH+"auto_pulish_info.txt");
+var OUT_PUT_CONTENT = FLfile.read(WORKING_PATH+"auto_pulish_info.json");
 
 var DOM ;
 

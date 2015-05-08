@@ -52,14 +52,14 @@ package
 		protected var _allImportConfigs:Dictionary;
 		protected var _bmp:Bitmap;
 		
-		protected const CONFIG:String = "import_config.txt";
+		protected const CONFIG:String = "import_config.json";
 		protected var _fileStream:FileStream;
 		/**
 		 * 工具自身数据保存位置
 		 */		
 		protected const TOOL_DATA_SAVE:File = File.applicationStorageDirectory;
 		
-		protected const TOOL_DATA_FILE:String = "png2fla_saved.txt";
+		protected const TOOL_DATA_FILE:String = "png2fla_saved.json";
 		
 		protected const JSFL_FILE:String = "auto_export.jsfl";
 		
@@ -81,7 +81,7 @@ package
 		/**
 		 *新的图像偏移量保存文件 
 		 */		
-		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/auto_pulish_info.txt";
+		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/auto_pulish_info.json";
 		
 		public function Png2Fla()
 		{
@@ -804,6 +804,15 @@ package
 			_panel.current_path.text = _workingPath==null ? "请选择工作目录":_workingPath.nativePath;
 			_panel.addons_path.text = _saveData.addons==null ? _panel.addons_path.text : _saveData.addons;
 			_panel.open_path.enabled = _workingPath!=null;
+			CONFIG::RELEASE
+			{
+				_panel.jsfl.enabled = false;
+			}
+			CONFIG::DEBUG
+			{
+				_panel.jsfl.enabled = true;
+			}
+			
 		}
 	
 		/**
