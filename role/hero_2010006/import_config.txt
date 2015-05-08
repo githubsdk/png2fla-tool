@@ -1,72 +1,66 @@
 {
-  "x": 208,
-  "y": 252.4,
   "charfolder": {
+    "x": 208,
+    "y": 252.4,
+    "interval": 2,
+    "fileinterval": 2,
+    "labels": {
+      "30001": {
+        "firepointfile": "0009",
+        "labeljoin": {
+          "nameindex": 1,
+          "label": "spell"
+        },
+        "startsuffix": "appear_start",
+        "endsuffix": "appear_end"
+      },
+      "far": {
+        "firepointfile": "0009",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        }
+      },
+      "near": {
+        "firepointfile": "0009",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        }
+      },
+      "idle": {},
+      "walk": {},
+      "grave": {
+        "x": 10,
+        "y": 10,
+        "label": "grave",
+        "interval": 1
+      }
+    },
+    "folders": {},
+    "classname": "",
+    "flaname": "",
+    "layers": [
+      "reslayer",
+      "labellayer"
+    ],
     "ignor": [
       "special",
       "svn"
     ],
-    "interval": 2,
-    "layers": [
-      "res",
-      "label"
-    ],
+    "startsuffix": "start",
+    "endsuffix": "end",
+    "firepointsuffix": "fire_point",
     "join": "_",
-    "labels": {
-      "spell": {
-        "ignor": 0,
-        "start_suffix": "_start",
-        "end_suffix": "_end"
-      },
-      "attack": {
-        "ignor": 0,
-        "start_suffix": "_start",
-        "end_suffix": "_end"
-      },
-      "idskill": {
-        "ignor": 1,
-        "start_suffix": "_appear_start",
-        "end_suffix": "_appear_end",
-        "insert": [
-          {
-            "end_suffix": "_fire_point"
-          }
-        ]
-      }
-    },
-    "folders": {
-      "grave": {
-        "x": 10,
-        "y": 10,
-        "label": "gravestone",
-        "interval": 1,
-        "list": [],
-        "start_label": "_start",
-        "end_label": "_end",
-        "insert": [
-          {
-            "frame": 0,
-            "label": ""
-          }
-        ]
-      },
-      "idskill/30001/spell/down": {
-        "x": 0,
-        "y": 0,
-        "label": "",
-        "interval": 0,
-        "list": [],
-        "start_label": "_start",
-        "end_label": "_end",
-        "insert": [
-          {
-            "frame": 3,
-            "label": ""
-          }
-        ]
-      }
-    },
-    "classname": "",
-    "flaname": ""
+    "namemap": {
+      "dieeffect_": "DieEffect_",
+      "groundeffect_": "GroundEffect_",
+      "organismskillbuffer_": "OrganismSkillBuffer_",
+      "magicskill_": "MagicSkill_"
+    }
   }
 }

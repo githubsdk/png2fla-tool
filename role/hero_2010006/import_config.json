@@ -1,0 +1,92 @@
+{
+  "charfolder": {
+    "放肆的注释 0": "标记 [WARNNING] 的是每个角色都需要不同处理的。如果不处理会造成输出错误",
+    "放肆的注释 1": "标记 [NOTE] 的只是需要注意的地方，有时候不注意可能会影响处理结果",
+    "放肆的注释 2": "[WARNNING] 需要墓碑 grave 的角色，手动复制标准的grave文件夹到该文件夹",
+    "放肆的注释 3": "[WARNNING] 修改只需要改 【数字】或者【:】冒号之后的【双引号】之内的部分，不要增删任何标点",
+    "放肆的注释 99": "本配置不需要删除任何内容。比如grave配置有的角色不需要，那么不给它添加grave资源即可",
+    "放肆的注释 x y": "[WARNNING] x，y 每个角色都不同，需要手动配置修改。即未处理的图片，放到时间轴上的x，y坐标，详细参见说明文档截图",
+    "x": 208,
+    "y": 252.4,
+    "放肆的注释 interval": "角色全局属性，每张图片持续的帧数，通常不需要修改",
+    "interval": 2,
+    "放肆的注释 fileinterval": "角色全局属性，从编号最小的图片开始，每隔fileinterval数量使用一张图片",
+    "fileinterval": 2,
+    "放肆的注释 labels": "个性化配置",
+    "labels": {
+      "放肆的注释 30001": "[WARNNING] 30001代表技能id，需要使用技能id的动作这里必须修改为对应的id",
+      "30001": {
+        "放肆的注释 firepointfile": "[WARNNING] 打击点使用的图片名，必须是出去后缀名的图片全名。注意不能使用不会被放到时间轴上的图片名",
+        "firepointfile": "0009",
+        "放肆的注释 labeljoin": "个性化标签。以 up_spell_30001_appear_start 为例， 表示在第一个 _ 之后，插入 spell 字符串",
+        "labeljoin": {
+          "nameindex": 1,
+          "label": "spell"
+        },
+        "放肆的注释 startsuffix endsuffix": "个性化标签。结束字符串。为了处理和全局标签结束规则不一样的动作。",
+        "startsuffix": "appear_start",
+        "endsuffix": "appear_end"
+      },
+      "放肆的注释 far": " 远程攻击",
+      "far": {
+        "放肆的注释 firepointfile": "[WARNNING] 打击点使用的图片名，必须是出去后缀名的图片全名。注意不能使用不会被放到时间轴上的图片名",
+        "firepointfile": "0009",
+        "放肆的注释 startsuffix endsuffix": "个性化标签。结束字符串。为了处理和全局标签结束规则不一样的动作。",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end"
+      },
+      "放肆的注释 near": " 近身攻击",
+      "near": {
+        "放肆的注释 firepointfile": "[WARNNING] 打击点使用的图片名，必须是出去后缀名的图片全名。注意不能使用不会被放到时间轴上的图片名",
+        "firepointfile": "0009",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end"
+      },
+      "放肆的注释 idle": " 待机。无特殊规则",
+      "idle": {},
+      "放肆的注释 walk": " 走路。无特殊规则",
+      "walk": {},
+      "放肆的注释 grave": " 墓碑。英雄角色需要",
+      "grave": {
+        "放肆的注释 x y": "[NOTE] 墓碑图片比较小，使用的对其坐标不一样。通常改完一次后不需要再改",
+        "x": 10,
+        "y": 10,
+        "放肆的注释 label": "墓碑图片的帧名强制使用label配置的，不使用任何全局规则",
+        "label": "grave",
+        "放肆的注释 interval": "只持续一帧",
+        "interval": 1
+      }
+    },
+    "放肆的注释 folders": "根据以上配置生成的文件名、文件路径、修正后的坐标、标签名等信息",
+    "folders": {},
+    "放肆的注释 classname": "根据文件夹名生成的原件类名",
+    "classname": "",
+    "放肆的注释 flaname": "保存fla的名字",
+    "flaname": "",
+    "放肆的注释 layers": "时间轴上添加层的名字。按前后顺序，在时间轴上的排列顺序是自下而上",
+    "layers": [
+      "reslayer",
+      "labellayer"
+    ],
+    "放肆的注释 ignor": "忽略文件夹的名字。忽略这些文件夹下的任何内容",
+    "ignor": [
+      "svn",
+      "git"
+    ],
+    "放肆的注释 startsuffix endsuffix": "全局使用的动作标签结束字符。每个文件夹有自己的个性化配置",
+    "startsuffix": "start",
+    "endsuffix": "end",
+    "放肆的注释 firepointsuffix": "全局使用的firepoint标签结束字符",
+    "firepointsuffix": "fire_point",
+    "放肆的注释 join": "标签名字连接字符串",
+    "join": "_",
+    "放肆的注释 namemap": "[NOTE] 首字符大写程序不能处理的部分。由多个单词组成的文件夹。可以修改文件夹命名，直接按照大写规则写好这里就不用填了",
+    "namemap": {
+      "放肆的注释 dieeffect_": "冒号之前是文件夹中的通用单词，之后是对该单词大小写处理的结果",
+      "dieeffect_": "DieEffect_",
+      "groundeffect_": "GroundEffect_",
+      "organismskillbuffer_": "OrganismSkillBuffer_",
+      "magicskill_": "MagicSkill_"
+    }
+  }
+}

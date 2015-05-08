@@ -1,0 +1,66 @@
+{
+  "charfolder": {
+    "x": 208,
+    "y": 252.4,
+    "interval": 2,
+    "fileinterval": 2,
+    "labels": {
+      "30001": {
+        "firepointfile": "0009",
+        "labeljoin": {
+          "nameindex": 1,
+          "label": "spell"
+        },
+        "startsuffix": "appear_start",
+        "endsuffix": "appear_end"
+      },
+      "far": {
+        "firepointfile": "0009",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        }
+      },
+      "near": {
+        "firepointfile": "0009",
+        "startsuffix": "attack_start",
+        "endsuffix": "attack_end",
+        "labeljoin": {
+          "nameindex": 2,
+          "label": ""
+        }
+      },
+      "idle": {},
+      "walk": {},
+      "grave": {
+        "x": 10,
+        "y": 10,
+        "label": "grave",
+        "interval": 1
+      }
+    },
+    "folders": {},
+    "classname": "",
+    "flaname": "",
+    "layers": [
+      "reslayer",
+      "labellayer"
+    ],
+    "ignor": [
+      "special",
+      "svn"
+    ],
+    "startsuffix": "start",
+    "endsuffix": "end",
+    "firepointsuffix": "fire_point",
+    "join": "_",
+    "namemap": {
+      "dieeffect_": "DieEffect_",
+      "groundeffect_": "GroundEffect_",
+      "organismskillbuffer_": "OrganismSkillBuffer_",
+      "magicskill_": "MagicSkill_"
+    }
+  }
+}

@@ -1,6 +1,5 @@
 ﻿/************************************************
-合并文件里的指定帧到muban.fla
-并且将muban中的内容导出png图片到指定文件夹
+
 *************************************************/
 
 //资源停到的帧 
@@ -40,7 +39,7 @@ var SCRIPT_PATH = getFolderPath(fl.scriptURI,1);
 
 var WORKING_PATH = getFolderPath(SCRIPT_PATH,2);
 
-var OUT_PUT_CONTENT = FLfile.read(WORKING_PATH+"auto_pulish_info.txt");
+var OUT_PUT_CONTENT = FLfile.read(WORKING_PATH+"auto_pulish_info.json");
 
 var DOM ;
 
@@ -125,7 +124,8 @@ function init()
 				importFiles(uirlist,folder);
 				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval,folder_cfg.insert);
 			}
-			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+".fla");
+
+			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla",char_cfg.flaname);
 		}
 		
 	}
@@ -164,8 +164,19 @@ function parsePublishInfo()
 	}
 }
 
-function saveFlaAndPublish(savePath)
+function saveFlaAndPublish(savePath,fileName)
 {
+	//修改发布配置，把文件发布到上级目录 
+	var profile = DOM.exportPublishProfileString();
+
+	profile = profile.replace("<flashDefaultName>1</flashDefaultName>", "<flashDefaultName>0</flashDefaultName>");
+	profile = profile.replace("<defaultNames>1</defaultNames>", "<defaultNames>0</defaultNames>");
+	while(profile.indexOf(NAME)!=-1)
+	{
+		profile = profile.replace(NAME, "../"+fileName);
+	}
+	trace(profile)
+	DOM.importPublishProfileString(profile);
 	fl.saveDocument(DOM , savePath);
 	DOM.publish();
 	fl.closeDocument(DOM);
@@ -188,16 +199,17 @@ function addItemsToTimeLine(folder,itemName, itemNames, posList, startLabel, end
 	var dest_index = start_index + add_frames - 1;
 	timeline.currentLayer=0;
 	
-	timeline.insertBlankKeyframe(dest_index);
+	if(dest_index!=start_index)
+		timeline.insertBlankKeyframe(dest_index);
+
 	if(start_index!=0)
 		timeline.convertToKeyframes(start_index);
 	for each(var insert_label_info in indertLabels)
 	{
 		var insert_frame = start_index+insert_label_info.frame-1;
 		timeline.convertToKeyframes(insert_frame);
-		timeline.setFrameProperty("name", insert_label_info.label, insert_frame);
+		timeline.setFrameProperty("name", insert_label_info.lable, insert_frame);
 	}
-		
 	timeline.setFrameProperty("name", startLabel, start_index);
 	timeline.setFrameProperty("name", endLabel, dest_index);
 	

@@ -10,6 +10,9 @@ package
 		protected var _fullPath:String;
 		protected var _shiftX:Number;
 		protected var _shiftY:Number;
+		protected var _rootName:String;
+		protected var _actionName:String;
+		protected var _dirName:String;
 		
 		public function FileData(file:File=null, root:File=null)
 		{
@@ -17,6 +20,13 @@ package
 			_root = root;
 			_nameIndex = -1;
 			_shiftX = _shiftY = 0;
+			if(_file!=null && _root!=null)
+			{
+				var folders:Array = fullPath.split("/");
+				_actionName = folders[1];
+				_dirName = folders[2];
+				_rootName = folders[0];
+			}
 		}
 
 		public function get file():File
@@ -75,6 +85,21 @@ package
 		public function set shiftY(value:Number):void
 		{
 			_shiftY = value;
+		}
+
+		public function get rootName():String
+		{
+			return _rootName;
+		}
+
+		public function get actionName():String
+		{
+			return _actionName;
+		}
+
+		public function get dirName():String
+		{
+			return _dirName;
 		}
 
 
