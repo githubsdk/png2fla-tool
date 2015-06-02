@@ -301,6 +301,7 @@ function createItem(itemName,linkName,itemType)
 		if(linkName!=null)
 		{
 			items[0].linkageExportForAS = true;
+			items[0].linkageExportInFirstFrame = true;
 			items[0].linkageClassName = linkName;
 		}
 		return items[0];
