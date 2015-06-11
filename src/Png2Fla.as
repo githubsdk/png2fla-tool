@@ -19,9 +19,11 @@ package
 	import flash.geom.Rectangle;
 	import flash.net.FileFilter;
 	import flash.net.URLRequest;
+	import flash.system.System;
 	import flash.text.TextFormat;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
 	import debugger.Debugger;
 	
@@ -121,14 +123,20 @@ package
 				if(_fileStream.bytesAvailable>0)
 				{
 					var content:String = _fileStream.readUTFBytes(_fileStream.bytesAvailable);
-					var cfg:Object = JSON.parse(content);
-					return cfg;
+					try{
+						var cfg:Object = JSON.parse(content);
+						return cfg;
+					}catch(e:Error)
+					{
+						log(dir.nativePath+"目录下的配置文件解析出错");
+					}
+				
 				}
 				_fileStream.close();
 			} 
 			catch(error:Error) 
 			{
-				log(dir+"目录下不存在配置文件："+CONFIG);
+				log(dir.nativePath+"目录下不存在配置文件："+CONFIG);
 			}
 			
 			return null;
@@ -255,7 +263,10 @@ package
 			}
 
 			_panel.start.enabled = false;
+			
+			time();
 			var children:Array = _workingPath.getDirectoryListing();
+			time(true, "找到所有文件夹");
 			
 			for(var key:String in _allFoundFiles)
 			{
@@ -292,6 +303,7 @@ package
 
 			//找出所有文件，添加必要信息保存成FileData列表
 			var allfiles:Vector.<FileData> = new Vector.<FileData>;
+			time();
 			for each(var char:File in children)
 			{
 				if(char.isDirectory==false)
@@ -299,6 +311,7 @@ package
 				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
 				_allImportConfigs[char.name] = readConfig(char);
 			}
+			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
 			for each(var folder_files_dic:Dictionary in _filesInEveryFolder)
 			{
@@ -308,10 +321,12 @@ package
 					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
 				}
 			}
+			time(true, "排序文件");
 			log("本次处理文件数："+_allFoundFilesVec.length);
 			extentions = null;
 			//组个处理图像并保存
 			executeAllImage(_allFoundFilesVec.reverse(), onAllImagesDone);
+			time(true, "处理图像");
 			return;
 		}
 		
@@ -419,6 +434,7 @@ package
 					onDone.apply(null, null);
 				return;
 			}
+			log("剩余文件个数:"+images.length);
 			var child:FileData = images.pop();
 			var file:File = child.file;
 			Debugger.log(file.extension, file.name);
@@ -502,6 +518,10 @@ package
 			var DQM:String = '"';
 			var first_up:String = rootName;
 			var json:Object = _allImportConfigs[rootName];
+			if(json==null)
+			{
+				log(rootName+" config json is null! 可能是解析出错了，这个文件需要单独导出。!", "ff0000");
+			}
 			//为防止修改原本内容，克隆出该对象
 			json = ObjectUtils.clone(json);
 			//将charfolder这个key替换成rootName以保证其唯一性
@@ -891,6 +911,23 @@ package
 		{
 			var file:File = File.applicationDirectory.resolvePath(fileName);
 			file.openWithDefaultApplication();
+		}
+		
+		private var _latest:int=0;
+		protected function time(show:Boolean=false, ...args):void
+		{
+			if(show==true)
+			{
+				log(args + " use time = " + (getTimer()-_latest) + " ms");
+				log("mem use:","00ff00");
+				var k:uint = 1024;
+				log((System.privateMemory/k) + "kb privateMemory");
+				log((System.totalMemory/k) + "kb totalMemory");
+				log((System.totalMemoryNumber/k) + "kb totalMemoryNumber");
+				_latest = getTimer();
+			}else{
+				_latest = getTimer();
+			}
 		}
 		
 		protected function log(content:String, color:String=null):void
