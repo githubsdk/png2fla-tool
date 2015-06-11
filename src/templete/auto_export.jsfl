@@ -173,7 +173,7 @@ function saveFlaAndPublish(savePath,fileName)
 	profile = profile.replace("<defaultNames>1</defaultNames>", "<defaultNames>0</defaultNames>");
 	while(profile.indexOf(NAME)!=-1)
 	{
-		profile = profile.replace(NAME, "../"+fileName);
+		profile = profile.replace(NAME, fileName);
 	}
 	trace(profile)
 	DOM.importPublishProfileString(profile);
