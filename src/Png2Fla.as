@@ -567,9 +567,12 @@ package
 				for (var file_index:int = 0; file_index < count; file_index+=file_interval)
 				{
 					var fd:FileData = list[file_index];
-					if(fire_poin_file!=null && fire_poin_file.length>0 && fd.file.name.indexOf(fire_poin_file)>=0)
+					if(fire_poin_file!=null && fire_poin_file.length>0)
 					{
-						fire_poin_frame = file_index+1;
+						if(fd.file.name.indexOf(fire_poin_file)>=0)
+							fire_poin_frame = file_index+1;
+						else
+							log( rootName + "没有找到 firepointfile = "+fire_poin_file+"的文件，请检查", "ff0000");
 					}
 					infos.push([fd.file.name,getSavePath(fd.file.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}

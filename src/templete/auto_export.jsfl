@@ -125,7 +125,7 @@ function init()
 				addItemsToTimeLine(folder,item_name,nameslist,poslist,folder_cfg.start_label,folder_cfg.end_label,folder_cfg.interval,folder_cfg.insert);
 			}
 
-			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+"/"+char_cfg.flaname+".fla",char_cfg.flaname);
+			saveFlaAndPublish(WORKING_PATH+char_cfg.flaname+".fla",char_cfg.flaname);
 		}
 		
 	}
@@ -173,7 +173,7 @@ function saveFlaAndPublish(savePath,fileName)
 	profile = profile.replace("<defaultNames>1</defaultNames>", "<defaultNames>0</defaultNames>");
 	while(profile.indexOf(NAME)!=-1)
 	{
-		profile = profile.replace(NAME, "../"+fileName);
+		profile = profile.replace(NAME, fileName);
 	}
 	trace(profile)
 	DOM.importPublishProfileString(profile);
