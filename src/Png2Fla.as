@@ -363,6 +363,8 @@ package
 			for (var char_folder:String in _filesInCharFolder)
 			{
 				var json:Object = generateSaveContent(char_folder, getFullPath(_workingPath.resolvePath(char_folder).url) );
+				if(json==null)
+					continue;
 				jsons.push(json);
 			}
 			content = JSON.stringify(jsons);
@@ -434,7 +436,7 @@ package
 					onDone.apply(null, null);
 				return;
 			}
-			log("剩余文件个数:"+images.length);
+			_panel.filecount.text = images.length.toString();
 			var child:FileData = images.pop();
 			var file:File = child.file;
 			Debugger.log(file.extension, file.name);
@@ -521,6 +523,7 @@ package
 			if(json==null)
 			{
 				log(rootName+" config json is null! 可能是解析出错了，这个文件需要单独导出。!", "ff0000");
+				return null;
 			}
 			//为防止修改原本内容，克隆出该对象
 			json = ObjectUtils.clone(json);
@@ -594,7 +597,7 @@ package
 					}
 					infos.push([fd.file.name,getSavePath(fd.file.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
-				if(fire_poin_frame==1)
+				if(fire_poin_file!=null && fire_poin_frame==1)
 					log( fullname + " 没有找到 firepointfile = "+fire_poin_file+"的文件，请检查 ", "ff0000");
 				files_cfg_obj.list = infos;
 				files_cfg_obj.interval = interval;
