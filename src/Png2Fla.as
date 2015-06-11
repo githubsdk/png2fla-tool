@@ -438,17 +438,15 @@ package
 			}
 			_panel.filecount.text = images.length.toString();
 			var child:FileData = images.pop();
-			var file:File = child.file;
-			Debugger.log(file.extension, file.name);
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
-			_loader.load(new URLRequest(file.url));
+			_loader.load(new URLRequest(child.url));
 			
 			function onLoaderHandler(event:Event):void
 			{
 				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
-				var cfg:Object = _allImportConfigs[child.root.name];
+				var cfg:Object = _allImportConfigs[child.rootName];
 				var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
 				var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
 				executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
@@ -470,7 +468,6 @@ package
 		{
 			if(source==null)
 				return;
-			var image:File = fd.file;
 			var rect:Rectangle = getBitmapDataValidRect(source);
 			//这里虽然保存了偏移坐标，但只是一个预览用的
 			fd.shiftX =  rect.x-shiftX;
@@ -486,7 +483,7 @@ package
 			_bmp.y = fd.shiftY;
 
 			//保存处理过的图像
-			var save_path:String = getSavePath(image.nativePath, false, fd.rootName);
+			var save_path:String = getSavePath(fd.nativePath, false, fd.rootName);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
@@ -592,10 +589,10 @@ package
 					var fd:FileData = list[file_index];
 					if(fire_poin_file!=null && fire_poin_file.length>0)
 					{
-						if(fd.file.name.indexOf(fire_poin_file)>=0)
+						if(fd.sName.indexOf(fire_poin_file)>=0)
 							fire_poin_frame = file_index+1;
 					}
-					infos.push([fd.file.name,getSavePath(fd.file.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+					infos.push([fd.sName,getSavePath(fd.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				if(fire_poin_file!=null && fire_poin_frame==1)
 					log( fullname + " 没有找到 firepointfile = "+fire_poin_file+"的文件，请检查 ", "ff0000");
@@ -747,9 +744,9 @@ package
 						folder_file_dic[fd.fullPath] = vec = new Vector.<FileData>;
 					vec.push(fd);
 					
-					var list:Dictionary = _filesInCharFolder[fd.root.name];
+					var list:Dictionary = _filesInCharFolder[fd.rootName];
 					if(list==null)
-						_filesInCharFolder[fd.root.name]=list = new Dictionary();
+						_filesInCharFolder[fd.rootName]=list = new Dictionary();
 					list[fd.fullPath] = vec;
 				}
 			}
