@@ -571,11 +571,11 @@ package
 					{
 						if(fd.file.name.indexOf(fire_poin_file)>=0)
 							fire_poin_frame = file_index+1;
-						else
-							log( rootName + "没有找到 firepointfile = "+fire_poin_file+"的文件，请检查", "ff0000");
 					}
 					infos.push([fd.file.name,getSavePath(fd.file.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
+				if(fire_poin_frame==1)
+					log( fullname + " 没有找到 firepointfile = "+fire_poin_file+"的文件，请检查 ", "ff0000");
 				files_cfg_obj.list = infos;
 				files_cfg_obj.interval = interval;
 				
