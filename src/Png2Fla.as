@@ -34,6 +34,8 @@ package
 	import fl.core.UIComponent;
 	import fl.events.SliderEvent;
 	
+	import utils.FormularChecker;
+	
 	public class Png2Fla extends Sprite
 	{
 		protected var _panel:PanelSkin;
@@ -295,6 +297,10 @@ package
 				_filesInFolder.addFolder(char.getDirectoryListing(), extentions, char);
 				_allImportConfigs[char.name] = readConfig(char);
 			}
+			
+			var fc:FormularChecker = new FormularChecker();
+			fc.execute(_filesInFolder.filesInFolder);
+			return;
 			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
 			for each(var folder_files_dic:Dictionary in _filesInFolder.filesInFolder)
