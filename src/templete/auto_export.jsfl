@@ -73,10 +73,7 @@ function init()
 	{
 		for (var char_name in chars_info)
 		{
-			//不存在的文件夹就不处理了。
-			//某些情况下可能一部分文件生成失败了，这时候可以把成功的文件夹删掉以节约重新导出的时间
-			if(ALL_FOLDERS!=null && ALL_FOLDERS.indexOf(char_name)<0)
-				continue;
+			
 			openTempleteFLA();
 
 			DOM = fl.getDocumentDOM();
