@@ -1,0 +1,51 @@
+{
+  "directions": {
+    "0": "up",
+    "1": "down",
+    "2": "left",
+    "3": "right",
+    "4": "upleft",
+    "5": "upright",
+    "6": "downfeft",
+    "7": "downright"
+  },
+  "actions": {
+    "0": "walk",
+    "1": "idle",
+    "2": "far",
+    "3": "near",
+    "4": "grave",
+    "5": "appear",
+    "6": "disappear",
+    "7": "\\d+"
+  },
+  "rules": {
+    "hero": {
+      "actions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "directions": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "bullet": {
+      "actions": [
+        1
+      ]
+    }
+  }
+}

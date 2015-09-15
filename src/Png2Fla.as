@@ -27,6 +27,8 @@ package
 	
 	import debugger.Debugger;
 	
+	import fileUtils.FilesInFolder;
+	
 	import fl.controls.Label;
 	import fl.controls.TextArea;
 	import fl.core.UIComponent;
@@ -39,15 +41,7 @@ package
 		protected var _bCopying:Boolean;
 		protected var _loader:Loader;
 		protected var _allFoundFiles:Dictionary;
-		protected var _allFoundFilesVec:Vector.<FileData>;
-		/**
-		 *每个子文件夹下的文件 
-		 */		
-		protected var _filesInEveryFolder:Dictionary;
-		/**
-		 *每个角色文件夹下的文件列表 
-		 */		
-		protected var _filesInCharFolder:Dictionary;
+		protected var _allFoundFilesVec:Vector.<PngFileData>;
 		/**
 		 *路径做索引，保存每个根目录 import_config.txt 的内容
 		 */		
@@ -76,6 +70,8 @@ package
 		 */		
 		protected var _saveData:Object;
 		
+		protected var _filesInFolder:FilesInFolder;
+		
 		/**
 		 *新的图像保存位置 
 		 */		
@@ -90,7 +86,7 @@ package
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			stage.color = 0x0099ff;
-
+			
 			_panel = new PanelSkin();
 			addChild(_panel);
 			_panel.addEventListener(MouseEvent.CLICK,  onMouseClick);
@@ -274,22 +270,9 @@ package
 			}
 			_allFoundFiles = null;
 			_allFoundFiles = new Dictionary();
-			for (key in _filesInEveryFolder)
-			{
-				delete _filesInEveryFolder[key];
-			}
-			_filesInEveryFolder = null;
-			_filesInEveryFolder = new Dictionary();
-			
-			for (key in _filesInCharFolder)
-			{
-				delete _filesInCharFolder[key];
-			}
-			_filesInCharFolder = null;
-			_filesInCharFolder = new Dictionary();
 			
 			_allImportConfigs = new Dictionary();
-			_allFoundFilesVec ||= new Vector.<FileData>();
+			_allFoundFilesVec ||= new Vector.<PngFileData>();
 			_allFoundFilesVec.length = 0;
 			_bmp = new Bitmap();
 			addChild(_bmp);
@@ -302,20 +285,21 @@ package
 				extentions.push(_panel.jpg.label);
 
 			//找出所有文件，添加必要信息保存成FileData列表
-			var allfiles:Vector.<FileData> = new Vector.<FileData>;
 			time();
+			_filesInFolder = null;
+			_filesInFolder = new FilesInFolder();
 			for each(var char:File in children)
 			{
 				if(char.isDirectory==false)
 					continue;
-				fildAllImages(char.getDirectoryListing(), extentions,allfiles, char);
+				_filesInFolder.addFolder(char.getDirectoryListing(), extentions, char);
 				_allImportConfigs[char.name] = readConfig(char);
 			}
 			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
-			for each(var folder_files_dic:Dictionary in _filesInEveryFolder)
+			for each(var folder_files_dic:Dictionary in _filesInFolder.filesInFolder)
 			{
-				for each(var vec:Vector.<FileData> in folder_files_dic)
+				for each(var vec:Vector.<PngFileData> in folder_files_dic)
 				{
 					vec = vec.sort(fileDataSort);
 					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
@@ -346,7 +330,7 @@ package
 			return fullpath;
 		}
 		
-		protected function fileDataSort(a:FileData, b:FileData):int
+		protected function fileDataSort(a:PngFileData, b:PngFileData):int
 		{
 			if(a.fileNameIndex>b.fileNameIndex)
 				return 1;
@@ -360,14 +344,14 @@ package
 			var file:File = _workingPath.parent;
 			var content:String = "";
 			var jsons:Array = new Array();
-			for (var char_folder:String in _filesInCharFolder)
+			for (var char_folder:String in _filesInFolder.filesInRootFolder)
 			{
 				var json:Object = generateSaveContent(char_folder, getFullPath(_workingPath.resolvePath(char_folder).url) );
 				if(json==null)
 					continue;
 				jsons.push(json);
 			}
-			content = JSON.stringify(jsons);
+			content = JSON.stringify(jsons, null, 4);
 			
 			saveContent(file.resolvePath(IMAGE_POS_FILE), content);
 			
@@ -428,7 +412,7 @@ package
 		 * @param onDone
 		 * 
 		 */		
-		protected function executeAllImage(images:Vector.<FileData>, onDone:Function):void
+		protected function executeAllImage(images:Vector.<PngFileData>, onDone:Function):void
 		{
 			if(images==null || images.length==0)
 			{
@@ -437,7 +421,7 @@ package
 				return;
 			}
 			_panel.filecount.text = images.length.toString();
-			var child:FileData = images.pop();
+			var child:PngFileData = images.pop();
 			_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoaderHandler);
 			_loader.load(new URLRequest(child.url));
 			
@@ -464,7 +448,7 @@ package
 		 * @param shiftY
 		 * 
 		 */		
-		protected function executeImageAndSave(source:BitmapData, fd:FileData, shiftX:Number, shiftY:Number):void
+		protected function executeImageAndSave(source:BitmapData, fd:PngFileData, shiftX:Number, shiftY:Number):void
 		{
 			if(source==null)
 				return;
@@ -513,7 +497,7 @@ package
 		 */		
 		protected function generateSaveContent(rootName:String, charFullPath:String):Object
 		{
-			var folder_files_dic:Dictionary = _filesInEveryFolder[charFullPath];
+			var folder_files_dic:Dictionary = _filesInFolder.filesInFolder[charFullPath];
 			var DQM:String = '"';
 			var first_up:String = rootName;
 			var json:Object = _allImportConfigs[rootName];
@@ -572,7 +556,7 @@ package
 				{
 					files_info_obj[keyname] = files_cfg_obj = new Object();
 				}
-				var list:Vector.<FileData> = folder_files_dic[fullname];
+				var list:Vector.<PngFileData> = folder_files_dic[fullname];
 				var count:uint = list.length;
 				var infos:Array = new Array();
 				//文件间隔，有的文件夹不需要全部图片都导入，如果无值，则赋值1，以防死循环
@@ -586,7 +570,7 @@ package
 				//写入list内容
 				for (var file_index:int = 0; file_index < count; file_index+=file_interval)
 				{
-					var fd:FileData = list[file_index];
+					var fd:PngFileData = list[file_index];
 					if(fire_poin_file!=null && fire_poin_file.length>0)
 					{
 						if(fd.sName.indexOf(fire_poin_file)>=0)
@@ -711,46 +695,6 @@ package
 		protected function firstLetterUpcase(str:String):String 
 		{ 
 			return str.charAt(0).toUpperCase()+str.substr(1).toLowerCase(); 
-		}
-		
-		/**
-		 *找出所有图像 
-		 * @param children
-		 * 
-		 */		
-		protected function fildAllImages(children:Array,extensions:Array, saveList:Vector.<FileData>, root:File):void
-		{
-			if(children==null || children.length==0)
-				return;
-			var child:File = children.pop();
-			if(child==null)
-				return;
-			if(child.isDirectory==true)
-			{
-				Debugger.log(child.extension, child.name);
-				fildAllImages(child.getDirectoryListing(),extensions, saveList,root);
-			}
-			else
-			{
-				if(extensions!=null &&extensions.indexOf( child.extension)>=0)
-				{
-					var fd:FileData = new FileData(child,root);
-					saveList.push(fd);
-					var folder_file_dic:Dictionary = _filesInEveryFolder[root.name];
-					if(folder_file_dic==null)
-						_filesInEveryFolder[root.name] = folder_file_dic = new Dictionary();
-					var vec:Vector.<FileData> = folder_file_dic[fd.fullPath];
-					if(vec==null)
-						folder_file_dic[fd.fullPath] = vec = new Vector.<FileData>;
-					vec.push(fd);
-					
-					var list:Dictionary = _filesInCharFolder[fd.rootName];
-					if(list==null)
-						_filesInCharFolder[fd.rootName]=list = new Dictionary();
-					list[fd.fullPath] = vec;
-				}
-			}
-			fildAllImages(children,extensions, saveList,root);
 		}
 		
 		protected function executeAllFolders(children:Array):void
