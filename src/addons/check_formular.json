@@ -32,7 +32,7 @@
           ]
         }
       },
-      "label": "英雄-hero",
+      "label": "英雄 hero",
       "actions": {
         "0": [
           0,
@@ -88,13 +88,6 @@
       }
     },
     "soldier": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
       "label": "士兵-soldier",
       "actions": {
         "0": [
@@ -150,15 +143,63 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "monster": {
+      "label": "怪物-monster",
+      "actions": {
+        "0": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "1": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "2": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "3": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "7": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    },
+    "tower": {
+      "label": "塔建筑-tower",
       "actions": {
         "0": [
           0,
@@ -213,15 +254,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "toft": {
+      "label": "塔基建造点-toft",
       "actions": {
         "0": [
           0,
@@ -276,15 +310,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "bullet": {
+      "label": "子弹-bullet",
       "actions": {
         "0": [
           0,
@@ -339,15 +366,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "special": {
+      "label": "技能特效-special",
       "actions": {
         "0": [
           0,
@@ -402,15 +422,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "organismskillbuffer": {
+      "label": "buff特效-organismskillbuffer",
       "actions": {
         "0": [
           0,
@@ -465,15 +478,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "dieeffect": {
+      "label": "死亡特效-dieeffect",
       "actions": {
         "0": [
           0,
@@ -528,15 +534,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "cursor": {
+      "label": "鼠标指针特效-cursor",
       "actions": {
         "0": [
           0,
@@ -591,15 +590,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "groundeffect": {
+      "label": "地表特效-groundeffect",
       "actions": {
         "0": [
           0,
@@ -654,15 +646,8 @@
         ]
       }
     },
-    "hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
+    "magicskill": {
+      "label": "玩家施放的魔法技能-magicskill",
       "actions": {
         "0": [
           0,
@@ -716,130 +701,6 @@
           7
         ]
       }
-    },"hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
-      "actions": {
-        "0": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "1": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "2": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "3": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "4": null,
-        "7": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
-      }
-    },"hero": {
-      "copy_files": {
-        "actions": {
-          "4": [
-            "templete/grave"
-          ]
-        }
-      },
-      "label": "英雄 hero",
-      "actions": {
-        "0": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "1": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "2": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "3": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ],
-        "4": null,
-        "7": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
-        ]
-      }
-    },
+    }
   }
 }
