@@ -27,6 +27,9 @@ package
 	
 	import debugger.Debugger;
 	
+	import dol.DOLFormular;
+	import dol.DOLFormularChecker;
+	
 	import fileUtils.FilesInFolder;
 	
 	import fl.controls.Label;
@@ -34,7 +37,8 @@ package
 	import fl.core.UIComponent;
 	import fl.events.SliderEvent;
 	
-	import utils.FormularChecker;
+	import foozuu.app.AppConfig;
+	
 	
 	public class Png2Fla extends Sprite
 	{
@@ -110,7 +114,82 @@ package
 			
 			setAllTextSize(_panel, _panel.font_size.value);
 			_panel.font_size.addEventListener(SliderEvent.CHANGE, onSliderHandler);
+			initComboBox();
 			updateState();
+		}
+		
+		private function initComboBox():void
+		{
+			var formular:AppConfig = DOLFormular.ins.formular;
+			
+			var rules:Object = formular.getData("rules");
+			var directions:Object = formular.getData("directions");
+			var actions:Object = formular.getData("actions");
+			for (var char_name:* in rules)
+			{
+				//首先使用配置的，如果没有则使用默认
+				var label:String = rules[char_name].label;
+				if(label==null)
+					label = char_name;
+				var grid_data:Array = new Array();
+				for (var action_key:* in rules[char_name].actions)
+				{
+					var action_name:String = actions[action_key];
+					
+					var copy_files:Object = rules[char_name].copy_files;
+					
+					var path_name:String = action_name;
+					
+					var dir_name:String = null;
+					var dirs_config:Object = rules[char_name].actions[action_key];
+					var save_data:Object = new Object();
+					if(dirs_config!=null)
+					{
+						for each(var dir_key:* in dirs_config)
+						{
+							save_data.path = path_name+"/"+directions[dir_key];
+							if(copy_files!=null && copy_files.directions!=null)
+							{
+								save_data.copy = copy_files.directions[dir_key];
+							}
+							grid_data.push(save_data);
+						}
+					}else{
+						save_data.path = path_name;
+						
+						if(copy_files!=null && copy_files.actions!=null)
+						{
+							save_data.copy = copy_files.actions[action_key];
+						}
+						grid_data.push(save_data);
+					}
+				}
+				var name_rule:String = rules[char_name].char_name_rule;
+				if(name_rule==null)
+					name_rule = formular.getData("char_name_rule");
+				_panel.folder_list.addItem({label:label,data:grid_data, folder:char_name, rule:name_rule});
+			}
+			_panel.create_folders.addEventListener(MouseEvent.CLICK, onMouseClick);
+			_panel.folder_list.addEventListener(Event.CHANGE, onChangeHandler);
+			_panel.create_folders.enabled = false;
+		}
+		
+		protected function onChangeHandler(e:Event):void
+		{
+			switch(e.type)
+			{
+				case Event.CHANGE:
+				{
+					checkCreateButton();
+					break;
+				}
+			}
+		}
+		
+		protected function checkCreateButton():void
+		{
+			var selected:Array = _panel.folder_list.selectedItems;
+			_panel.create_folders.enabled = selected!=null && selected.length>0;
 		}
 		
 		protected function readConfig(dir:File):Object
@@ -146,10 +225,37 @@ package
 			setAllTextSize(_panel, _panel.font_size.value);
 		}
 		
+		private function createSelectedFolders():void
+		{
+			var selected_list:Array = _panel.folder_list.selectedItems;
+			var time:int = getTimer();
+			for each(var selected:Object in selected_list)
+			{
+				for each(var path_data:Object in selected.data)
+				{
+					var dest:File = _workingPath.resolvePath(selected.folder+"_"+time + "/"+path_data.path.replace("\\d+", time));
+					dest.createDirectory();
+					for each(var copy_files:String in path_data.copy)
+					{
+						var source:File = File.applicationDirectory.resolvePath(copy_files);
+						source.copyTo(dest, true);
+					}
+					Debugger.log(selected.label, selected.data, selected.folder);
+				}
+			}
+			_panel.folder_list.selectedIndex = -1;
+			_panel.create_folders.enabled = false;
+		}
+		
 		protected function onMouseClick(event:MouseEvent):void
 		{
 			switch(event.target)
 			{
+				case _panel.create_folders:
+				{
+					createSelectedFolders();
+					break;
+				}
 				case _panel.open_path:
 				{
 					_workingPath.openWithDefaultApplication();
@@ -298,8 +404,7 @@ package
 				_allImportConfigs[char.name] = readConfig(char);
 			}
 			
-			var fc:FormularChecker = new FormularChecker();
-			fc.execute(_filesInFolder.filesInFolder);
+			check();	
 			return;
 			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
@@ -318,6 +423,19 @@ package
 			executeAllImage(_allFoundFilesVec.reverse(), onAllImagesDone);
 			time(true, "处理图像");
 			return;
+		}
+		
+		private function check():void
+		{
+			var fc:DOLFormularChecker = new DOLFormularChecker();
+			var log:Object = fc.execute(_filesInFolder.filesInFolder);
+			if(log!=null)
+			{
+				var date:Date = new Date();
+				var path:String = "log "+date.getFullYear()+" " + date.toTimeString() + ".txt";
+				saveContent( _workingPath.resolvePath(path), JSON.stringify(log, null, 4));
+				_workingPath.resolvePath(path).openWithDefaultApplication();
+			}
 		}
 		
 		/**
@@ -854,13 +972,6 @@ package
 			graphics.beginFill(0xff00ff);
 			graphics.drawRect(rect.x, rect.y, rect.width, rect.height);
 			graphics.endFill();*/
-		}
-		
-		//"assets/icon.png"
-		protected function openWithDefaultApplication(fileName:String="assets/icon.png"):void
-		{
-			var file:File = File.applicationDirectory.resolvePath(fileName);
-			file.openWithDefaultApplication();
 		}
 		
 		private var _latest:int=0;

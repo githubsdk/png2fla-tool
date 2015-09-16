@@ -1,26 +1,26 @@
-package utils
+package dol 
 {
-	import flash.desktop.NativeApplication;
-	import flash.filesystem.File;
 	import flash.utils.Dictionary;
+	
+	import debugger.Debugger;
 	
 	import fileUtils.FileData;
 	
 	import foozuu.app.AppConfig;
 
-	public class FormularChecker
+	public class DOLFormularChecker
 	{
 		protected var _formular:AppConfig;
-		protected var _lost:Object;
-		public function FormularChecker()
+		protected var _log:Object;
+		public function DOLFormularChecker()
 		{
-			_formular = new AppConfig(NativeApplication.nativeApplication, File.applicationDirectory.resolvePath("addons/check_formular.json").url);
+			_formular = DOLFormular.ins.formular;
 		}
 		
-		public function execute(list:Dictionary, clearLost:Boolean=true):*
+		public function execute(list:Dictionary, clearLog:Boolean=true):*
 		{
-			if(clearLost==true)
-				_lost = null;
+			if(clearLog==true)
+				_log = null;
 			
 			var content:String = _formular.getData("folder_name_cant_match_anyone_in_rule");
 			for (var root_name:String in list)
@@ -70,16 +70,16 @@ package utils
 				if(lost!=null)
 					updateLost(root_name, lost);
 			}
-			if(_lost!=null)
-				trace(JSON.stringify(_lost, null, 4));
-			return _lost;
+			if(_log!=null)
+				Debugger.log(JSON.stringify(_log, null, 4));
+			return _log;
 		}
 		
 		protected function updateLost(key:String, value:*):void
 		{
-			if(_lost==null)
-				_lost = new Object();
-			_lost[key] = value;
+			if(_log==null)
+				_log = new Object();
+			_log[key] = value;
 		}
 		
 		private function getRuleActions(rules:Object):Dictionary
