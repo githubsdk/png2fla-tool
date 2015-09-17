@@ -23,10 +23,36 @@ package dol
 				_log = null;
 			
 			var content:String = _formular.getData("folder_name_cant_match_anyone_in_rule");
+			var can_find_action_in_publish_config:String =  _formular.getData("can_find_action_in_publish_config");
+			var can_find_publish_config:String = _formular.getData("can_find_publish_config");
+			var default_value:String = _formular.getData("default_value");
+			
 			for (var root_name:String in list)
 			{
 				var rules:Object = checkRootNameValid(root_name);
 				var lost:Object = null;
+				var errors:Array;
+				
+				var publish_config:Object = publishConfigs[root_name];
+				if(publish_config==null)
+				{
+					lost ||= new Object();
+					errors = lost[can_find_publish_config];
+					if(errors==null)
+						lost[can_find_publish_config] = errors = new Array();
+					errors.push(root_name);
+				}else{
+					var defalut_value_error:Array = configValueCheck(_formular.getData("config_rules"), publish_config.charfolder);
+					if(defalut_value_error!=null)
+					{
+						lost ||= new Object();
+						errors = lost[default_value];
+						if(errors==null)
+							lost[default_value] = errors = new Array();
+						errors.push(defalut_value_error);
+					}
+				}
+				
 				//根目录匹配成功，继续检查子目录
 				if(rules!=null)
 				{
@@ -41,21 +67,44 @@ package dol
 							continue;
 						}
 						//如果目录可用，将该动作名标记为已找到，否则记录找不到目录
-						var action_name:String = checkPathValid(full_folder_path, rules);
-						if(action_name==null)
+						var check_result:Array = checkPathValid(full_folder_path, rules);
+						if(check_result==null)
 						{
 							lost ||= new Object();
 							lost[full_folder_path] = content;
 							continue;
 						}else{
-							actions[action_name] = true;
-							//if(publishConfigs[root_name]!=null)
-								//publishConfigCheck(publishConfigs[root_name].labels[action_name]);
+							actions[check_result[0]] = true;
+							if(publish_config!=null)
+							{
+								var action_config_data:Object = publish_config.charfolder.labels[ check_result[1] ];
+								if(action_config_data!=null)
+								{
+									var error_obj:Object = actionDefaultValueCheck(check_result[1], check_result[2], action_config_data);
+									if(error_obj!=null)
+									{
+										lost ||= new Object();
+										errors = lost[default_value];
+										if(errors==null)
+											lost[default_value] = errors = new Array();
+										errors.push(error_obj);
+									}
+								}
+								else
+								{
+									lost ||= new Object();
+									errors = lost[can_find_action_in_publish_config];
+									if(errors==null)
+										lost[can_find_action_in_publish_config+root_name] = errors = new Array();
+									errors.push(check_result[1]);
+								}
+							}
+							
 						}
 					}
 					
 					//遍历所有动作，如果有没被标记已找到，说明动作缺失
-					for( action_name in actions)
+					for( var action_name:* in actions)
 					{
 						if(actions[action_name]==false)
 						{
@@ -72,31 +121,29 @@ package dol
 				if(lost!=null)
 					updateLost(root_name, lost);
 			}
+
 			if(_log!=null)
 				Debugger.log(JSON.stringify(_log, null, 4));
 			return _log;
 		}
 		
-		/**
-		 *用当前 actionName 去检索有没有对应的规则，如果有规则，则检查该规则的内容
-		 * @param actionName
-		 * @param folderConfig
-		 * 
-		 */		
-		private function publishConfigCheck(folderConfig:Object):void
+		private function actionDefaultValueCheck(actionName:String, actionIndex:* , folderConfig:Object):Object
 		{
 			if(folderConfig==null)
-				return;
-			var config_details:Object = folderConfig.charfolder;
+				return null;
 			var rules_config:Object = _formular.getData("config_rules");
-			
 			var errors:Array ;
-			errors = configValueCheck(rules_config, config_details, _formular.getData("actions"));
-			var s:String = JSON.stringify(errors, null, 4);
-			Debugger.log(s);
+			errors = configValueCheck(rules_config.labels[actionIndex], folderConfig);
+			if(errors!=null)
+			{
+				var e:Object = new Object();
+				e[actionName] = errors;
+				return e;
+			}
+			return null;
 		}
 		
-		private function configValueCheck(source:Object, config:Object, keyReplacement:Object=null, simpleCheck:Boolean=true):Array
+		private function configValueCheck(source:Object, config:Object, simpleCheck:Boolean=true):Array
 		{
 			var errors:Array;
 			if(config==null)
@@ -105,25 +152,19 @@ package dol
 			{
 				errors ||= new Array();
 				var value:* = source[key];
-				var key_replaced:* = key;
-				if(keyReplacement!=null && keyReplacement[key]!=null)
-				{
-					//key值可被替换成别的内容，用被替换过的key来索引 config 里的数据
-					key_replaced = keyReplacement[key];
-				}
-				var key_reg:RegExp = new RegExp(key_replaced);
-				var key_exec:Array = key_reg.exec();
 				//只检查简单对象
 				if(ObjectUtils.checkSimpleObject(value)==true)
 				{
 					if(config[key]==null || config[key]==source[key])
 					{
-						errors.push(source[key]);
+						var temp_error:Object = new Object();
+						temp_error[key] = source[key];
+						errors.push(temp_error);
 					}
-				}else if(simpleCheck==true)
+				}else if(simpleCheck==false)
 				{
 					errors ||= new Array();
-					errors = errors.concat( configValueCheck(source[key], config[key], keyReplacement, simpleCheck) );
+					errors = errors.concat( configValueCheck(source[key], config[key], simpleCheck) );
 				}
 			}
 			
@@ -204,12 +245,10 @@ package dol
 		 * @return 
 		 * 
 		 */		
-		private function checkPathValid(path:String, rules:Object):String
+		private function checkPathValid(path:String, rules:Object):Array
 		{
 			var action_name:String;
 			var dir_name:String;
-			var find_path:Array;
-			
 			var find_action:String;
 			var actions:Object = rules.actions;
 			for (var action_key:* in actions)
@@ -218,6 +257,8 @@ package dol
 				action_name = _formular.getData("actions")[action_key];
 				dir_name = null;
 				var directions:Array = actions[action_key];
+				var action_reg:RegExp;
+				var action_reg_exe:Array;
 				//尝试找方向名，有的动作可能没有方向，也许没有结果
 				if(directions!=null)
 				{
@@ -229,16 +270,19 @@ package dol
 							var action_name_temp:String = action_name.replace("^","");
 							action_name_temp = action_name_temp.replace("$","");
 							var dir_reg:RegExp = new RegExp(action_name_temp+"/" + dir_name+"$");
-							find_path = dir_reg.exec(path);
-							if(find_path!=null)
-								return action_name;
+							if(dir_reg.exec(path)!=null)
+							{
+								action_reg = new RegExp(action_name_temp);
+								action_reg_exe = action_reg.exec(path);
+								return [action_name, action_reg_exe[0], action_key ];
+							}
 						}
 					}
 				}else{
-					var action_reg:RegExp = new RegExp(action_name);
-					find_path = action_reg.exec(path);
-					if(find_path!=null)
-						return action_name;
+					action_reg = new RegExp(action_name);
+					action_reg_exe = action_reg.exec(path);
+					if(action_reg_exe!=null)
+						return [action_name, action_reg_exe[0], action_key];
 				}
 			}
 			return null;
