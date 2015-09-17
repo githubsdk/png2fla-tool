@@ -459,7 +459,7 @@ package
 					ObjectUtils.merge(log[key], _configLog[key]);
 				}
 				var date:Date = new Date();
-				var path:String = "log "+date.getFullYear()+" " + date.toTimeString() + ".txt";
+				var path:String = "[log]"+date.getFullYear()+"-" + date.month + "-"+date.date+"-"+date.hours+"-"+date.minutes+"-"+date.seconds + ".txt";
 				saveContent( _workingPath.resolvePath(path), JSON.stringify(log, null, 4));
 				_workingPath.resolvePath(path).openWithDefaultApplication();
 			}
