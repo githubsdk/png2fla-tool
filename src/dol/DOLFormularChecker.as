@@ -22,34 +22,27 @@ package dol
 			if(clearLog==true)
 				_log = null;
 			
-			var content:String = _formular.getData("folder_name_cant_match_anyone_in_rule");
+			var folder_name_cant_match_anyone_in_rule:String = _formular.getData("folder_name_cant_match_anyone_in_rule");
 			var can_find_action_in_publish_config:String =  _formular.getData("can_find_action_in_publish_config");
 			var can_find_publish_config:String = _formular.getData("can_find_publish_config");
 			var default_value:String = _formular.getData("default_value");
+			var empty_folder:String = _formular.getData("empty_folder");
+			var cant_find_in_rule:String = _formular.getData("can_find_in_rule");
 			
 			for (var root_name:String in list)
 			{
 				var rules:Object = checkRootNameValid(root_name);
-				var lost:Object = null;
 				var errors:Array;
 				
 				var publish_config:Object = publishConfigs[root_name];
 				if(publish_config==null)
 				{
-					lost ||= new Object();
-					errors = lost[can_find_publish_config];
-					if(errors==null)
-						lost[can_find_publish_config] = errors = new Array();
-					errors.push(root_name);
+					updateLost(root_name, can_find_publish_config, root_name);
 				}else{
 					var defalut_value_error:Array = configValueCheck(_formular.getData("config_rules"), publish_config.charfolder);
 					if(defalut_value_error!=null)
 					{
-						lost ||= new Object();
-						errors = lost[default_value];
-						if(errors==null)
-							lost[default_value] = errors = new Array();
-						errors.push(defalut_value_error);
+						updateLost(root_name, default_value, defalut_value_error);
 					}
 				}
 				
@@ -62,16 +55,14 @@ package dol
 						var files_list:Vector.<FileData> = Vector.<FileData>( list[root_name][full_folder_path] );
 						if(files_list==null || files_list.length==0)
 						{
-							lost ||= new Object();
-							lost[root_name] = _formular.getData("empty_folder");
+							updateLost(root_name, empty_folder, full_folder_path);
 							continue;
 						}
 						//如果目录可用，将该动作名标记为已找到，否则记录找不到目录
 						var check_result:Array = checkPathValid(full_folder_path, rules);
 						if(check_result==null)
 						{
-							lost ||= new Object();
-							lost[full_folder_path] = content;
+							updateLost(root_name, folder_name_cant_match_anyone_in_rule, full_folder_path);
 							continue;
 						}else{
 							actions[check_result[0]] = true;
@@ -83,20 +74,12 @@ package dol
 									var error_obj:Object = actionDefaultValueCheck(check_result[1], check_result[2], action_config_data);
 									if(error_obj!=null)
 									{
-										lost ||= new Object();
-										errors = lost[default_value];
-										if(errors==null)
-											lost[default_value] = errors = new Array();
-										errors.push(error_obj);
+										updateLost(root_name, default_value, error_obj);
 									}
 								}
 								else
 								{
-									lost ||= new Object();
-									errors = lost[can_find_action_in_publish_config];
-									if(errors==null)
-										lost[can_find_action_in_publish_config+root_name] = errors = new Array();
-									errors.push(check_result[1]);
+									updateLost(root_name, can_find_action_in_publish_config, check_result[1]);
 								}
 							}
 							
@@ -108,18 +91,13 @@ package dol
 					{
 						if(actions[action_name]==false)
 						{
-							lost ||= new Object();
-							lost[action_name] = _formular.getData("can_find_in_rule");
+							updateLost(root_name, cant_find_in_rule, action_name);
 						}
 					}
 					
 				}else{
-					lost ||= new Object();
-					lost[root_name] = content;
+					updateLost(root_name, folder_name_cant_match_anyone_in_rule, root_name);
 				}
-				
-				if(lost!=null)
-					updateLost(root_name, lost);
 			}
 
 			if(_log!=null)
@@ -171,11 +149,17 @@ package dol
 			return errors;
 		}
 		
-		protected function updateLost(key:String, value:*):void
+		protected function updateLost(key:String, type:String, value:*):void
 		{
 			if(_log==null)
 				_log = new Object();
-			_log[key] = value;
+			var key_data:Object = _log[key];
+			if(key_data==null)
+				key_data = _log[key] = new Object();
+			var errors:Array = key_data[type];
+			if(errors==null)
+				errors = key_data[type] = new Array();
+			errors.push(value);
 		}
 		
 		private function getRuleActions(rules:Object):Dictionary

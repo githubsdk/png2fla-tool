@@ -1,8 +1,8 @@
 {
   "folder_name_cant_match_anyone_in_rule": "[ERROR] 文件夹的名字不存在匹配列表中，请检查:1、拼写错误；2、大小写；3、连接字符",
   "empty_folder": "[WARNNING] 文件夹存在于规则列表中，但是空的!需要确定该文件夹下是否真的不需要资源!",
-  "can_find_in_rule": "[WARNNING] 这个动作在规则列表中，但在当前角色目录没有找到，或者该动作目录是空的，请确认是否需要!",
-  "can_find_action_in_publish_config": "[ERROR] 这个动作在没有找到导出配置！请打开以下文件夹下的 import_config.json 确认修改：",
+  "can_find_in_rule": "[WARNNING] 动作在规则列表中，但在当前角色目录没有找到，或者该动作目录是空的，请确认是否需要!",
+  "can_find_action_in_publish_config": "[ERROR] 动作在没有找到导出配置！请打开以下文件夹下的 import_config.json 确认修改：",
   "can_find_publish_config": "[ERROR] 找不到该文件夹下的 import_config.json 文件！请手动复制或者使用『复制配置文件按钮』生成，然后修改配置。",
   "default_value": "[ERROR] 检测到了 import_config.json 中存在默认值，请检查以下配置：",
   "directions": {
