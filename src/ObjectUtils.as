@@ -78,6 +78,26 @@ package {
 			}
 		}
 		
+		/**
+		 *merge source in to dest and override same properties. 
+		 * @param dest
+		 * @param source
+		 * @return 
+		 * 
+		 */		
+		static public function merge(dest:Object, source:Object):Object
+		{
+			dest ||= new Object();
+			if(source!=null)
+			{
+				for (var key:* in source)
+				{
+					dest[key] = source[key];
+				}
+			}
+			return dest;
+		}
+		
 		private static var _tf:TextField = new TextField();
 		
 		/**获得实际文本*/

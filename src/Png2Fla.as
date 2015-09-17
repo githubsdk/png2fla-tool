@@ -78,6 +78,8 @@ package
 		
 		protected var _filesInFolder:FilesInFolder;
 		
+		protected var _date:Date;
+		
 		/**
 		 *新的图像保存位置 
 		 */		
@@ -87,12 +89,14 @@ package
 		 */		
 		protected const IMAGE_POS_FILE:String = IMAGE_SAVED_FOLDER + "/auto_pulish_info.json";
 		
+		protected var _configLog:Object;
+		
 		public function Png2Fla()
 		{
 			stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
 			stage.color = 0x0099ff;
-			
+			_date = new Date();
 			_panel = new PanelSkin();
 			addChild(_panel);
 			_panel.addEventListener(MouseEvent.CLICK,  onMouseClick);
@@ -114,11 +118,11 @@ package
 			
 			setAllTextSize(_panel, _panel.font_size.value);
 			_panel.font_size.addEventListener(SliderEvent.CHANGE, onSliderHandler);
-			initComboBox();
+			initFolderConfigList();
 			updateState();
 		}
 		
-		private function initComboBox():void
+		private function initFolderConfigList():void
 		{
 			var formular:AppConfig = DOLFormular.ins.formular;
 			
@@ -138,30 +142,34 @@ package
 					
 					var copy_files:Object = rules[char_name].copy_files;
 					
-					var path_name:String = action_name;
+					//把带正则表达式的文件夹名修改掉
+					var action_reg:RegExp = new RegExp(action_name);
+					var action_reg_exe:Array = action_reg.exec(_date.time.toString());
+					var path_name:String = action_reg_exe==null ? action_name : action_reg_exe[0];
 					
 					var dir_name:String = null;
-					var dirs_config:Object = rules[char_name].actions[action_key];
-					var save_data:Object = new Object();
-					if(dirs_config!=null)
+					var action_dirs:Object = rules[char_name].actions[action_key];
+					if(action_dirs!=null)
 					{
-						for each(var dir_key:* in dirs_config)
+						for each(var dir_key:* in action_dirs)
 						{
-							save_data.path = path_name+"/"+directions[dir_key];
+							var action_dir_data:Object = new Object();
+							action_dir_data.path = path_name+"/"+directions[dir_key];
 							if(copy_files!=null && copy_files.directions!=null)
 							{
-								save_data.copy = copy_files.directions[dir_key];
+								action_dir_data.copy = copy_files.directions[dir_key];
 							}
-							grid_data.push(save_data);
+							grid_data.push(action_dir_data);
 						}
 					}else{
-						save_data.path = path_name;
+						var action_data:Object = new Object();
+						action_data.path = path_name;
 						
 						if(copy_files!=null && copy_files.actions!=null)
 						{
-							save_data.copy = copy_files.actions[action_key];
+							action_data.copy = copy_files.actions[action_key];
 						}
-						grid_data.push(save_data);
+						grid_data.push(action_data);
 					}
 				}
 				var name_rule:String = rules[char_name].char_name_rule;
@@ -205,7 +213,10 @@ package
 						return cfg;
 					}catch(e:Error)
 					{
-						log(dir.nativePath+"目录下的配置文件解析出错");
+						//log(dir.nativePath+"目录下的配置文件解析出错");
+						_configLog ||= new Object();
+						_configLog[dir.name] ||= new Object();
+						_configLog[dir.name]["config_error"] = dir.nativePath+"目录下的配置文件解析出错";
 					}
 				
 				}
@@ -213,7 +224,10 @@ package
 			} 
 			catch(error:Error) 
 			{
-				log(dir.nativePath+"目录下不存在配置文件："+CONFIG);
+				//log(dir.nativePath+"目录下不存在配置文件："+CONFIG);
+				_configLog ||= new Object();
+				_configLog[dir.name] ||= new Object();
+				_configLog[dir.name]["config_exists"] = dir.nativePath+"目录下不存在配置文件："+CONFIG;
 			}
 			
 			return null;
@@ -228,12 +242,11 @@ package
 		private function createSelectedFolders():void
 		{
 			var selected_list:Array = _panel.folder_list.selectedItems;
-			var time:int = getTimer();
 			for each(var selected:Object in selected_list)
 			{
 				for each(var path_data:Object in selected.data)
 				{
-					var dest:File = _workingPath.resolvePath(selected.folder+"_"+time + "/"+path_data.path.replace("\\d+", time));
+					var dest:File = _workingPath.resolvePath(selected.folder+"_"+_date.time + "/"+path_data.path);
 					dest.createDirectory();
 					for each(var copy_files:String in path_data.copy)
 					{
@@ -396,6 +409,7 @@ package
 			time();
 			_filesInFolder = null;
 			_filesInFolder = new FilesInFolder();
+			_configLog = null;
 			for each(var char:File in children)
 			{
 				if(char.isDirectory==false)
@@ -431,6 +445,10 @@ package
 			var log:Object = fc.execute(_filesInFolder.filesInFolder);
 			if(log!=null)
 			{
+				for (var key:* in _configLog)
+				{
+					ObjectUtils.merge(log[key], _configLog[key]);
+				}
 				var date:Date = new Date();
 				var path:String = "log "+date.getFullYear()+" " + date.toTimeString() + ".txt";
 				saveContent( _workingPath.resolvePath(path), JSON.stringify(log, null, 4));

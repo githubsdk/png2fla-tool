@@ -20,7 +20,23 @@
     "4": "grave",
     "5": "appear",
     "6": "disappear",
-    "7": "\\d+"
+    "7": "^\\d+$"
+  },
+  "config_rules": {
+    "x": 65536,
+    "y": 65536,
+    "labels": {
+      "7": {
+        "firepointfile": 0
+      },
+      "2": {
+        "firepointfile": 0
+      },
+      "4": {
+        "x": 65536,
+        "y": 65536
+      }
+    }
   },
   "char_name_rule": "\\w+_\\d+",
   "rules": {

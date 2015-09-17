@@ -171,14 +171,16 @@ package dol
 						dir_name = _formular.getData("directions")[dir];
 						if(dir_name!=null)
 						{
-							var dir_reg:RegExp = new RegExp(action_name+"/" + dir_name+"$");
+							var action_name_temp:String = action_name.replace("^","");
+							action_name_temp = action_name_temp.replace("$","");
+							var dir_reg:RegExp = new RegExp(action_name_temp+"/" + dir_name+"$");
 							find_path = dir_reg.exec(path);
 							if(find_path!=null)
 								return action_name;
 						}
 					}
 				}else{
-					var action_reg:RegExp = new RegExp(action_name+"$");
+					var action_reg:RegExp = new RegExp(action_name);
 					find_path = action_reg.exec(path);
 					if(find_path!=null)
 						return action_name;
