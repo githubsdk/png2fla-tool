@@ -27,7 +27,7 @@ package dol
 			var can_find_publish_config:String = _formular.getData("can_find_publish_config");
 			var default_value:String = _formular.getData("default_value");
 			var empty_folder:String = _formular.getData("empty_folder");
-			var cant_find_in_rule:String = _formular.getData("can_find_in_rule");
+			var cant_find_in_rule:String = _formular.getData("cant_find_in_rule");
 			
 			for (var root_name:String in list)
 			{

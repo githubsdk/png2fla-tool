@@ -242,18 +242,28 @@ package
 		private function createSelectedFolders():void
 		{
 			var selected_list:Array = _panel.folder_list.selectedItems;
+			var time:Number = _date.time;
 			for each(var selected:Object in selected_list)
 			{
+				var dest:File;
+				var source:File;
+				var folder_name:String = selected.folder+"_"+ time;
 				for each(var path_data:Object in selected.data)
 				{
-					var dest:File = _workingPath.resolvePath(selected.folder+"_"+_date.time + "/"+path_data.path);
+					dest = _workingPath.resolvePath( folder_name + "/"+path_data.path);
 					dest.createDirectory();
 					for each(var copy_files:String in path_data.copy)
 					{
-						var source:File = File.applicationDirectory.resolvePath(copy_files);
+						source = File.applicationDirectory.resolvePath(copy_files);
 						source.copyTo(dest, true);
 					}
-					Debugger.log(selected.label, selected.data, selected.folder);
+				}
+				var dolf:DOLFormular = DOLFormular.ins;
+				for each(var copy_infos:Object in dolf.formular.getData("copy_files"))
+				{
+					dest = _workingPath.resolvePath(folder_name+"/"+copy_infos.file);
+					source = File.applicationDirectory.resolvePath(copy_infos.folder+"/"+copy_infos.file);
+					source.copyTo(dest, true);
 				}
 			}
 			_panel.folder_list.selectedIndex = -1;
@@ -419,7 +429,6 @@ package
 			}
 			
 			check();	
-			//return;
 			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
 			for each(var folder_files_dic:Dictionary in _filesInFolder.filesInFolder)
