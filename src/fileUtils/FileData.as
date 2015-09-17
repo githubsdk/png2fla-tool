@@ -8,9 +8,7 @@ package fileUtils
 		protected var _sName:String;
 		protected var _nativePath:String;
 		protected var _sRootName:String;
-		protected var _fullPath:String;
-		
-		protected var _rootName:String;
+		protected var _folderPath:String;
 		
 		public function FileData(file:File=null, root:File=null)
 		{
@@ -20,13 +18,10 @@ package fileUtils
 				_sName = file.name;
 				_nativePath = file.nativePath;
 				
-				_fullPath = _url.replace("/"+file.name,"");
-				_fullPath = _fullPath.replace(root.parent.url+"/","");
+				_folderPath = _url.replace("/"+file.name,"");
+				_folderPath = _folderPath.replace(root.url+"/","");
 				
 				_sRootName = root.name;
-				
-				var folders:Array = fullPath.split("/");
-				_rootName = folders[0];
 			}
 		}
 		
@@ -65,19 +60,10 @@ package fileUtils
 		 * @return 
 		 * 
 		 */		
-		public function get fullPath():String
+		public function get folderPath():String
 		{
-			return _fullPath;
+			return _folderPath;
 		}
 		
-		/**
-		 *根目录文件夹名 
-		 * @return 
-		 * 
-		 */		
-		public function get rootName():String
-		{
-			return _rootName;
-		}
 	}
 }

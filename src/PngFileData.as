@@ -26,9 +26,9 @@ package
 					_nameIndex = int(name);
 				}
 				
-				var folders:Array = fullPath.split("/");
-				_actionName = folders[1];
-				_dirName = folders[2];
+				var folders:Array = folderPath.split("/");
+				_actionName = folders[0];
+				_dirName = folders[1];
 			}
 		}
 		

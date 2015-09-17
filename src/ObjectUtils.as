@@ -98,6 +98,23 @@ package {
 			return dest;
 		}
 		
+		/**
+		 *检查一个对象是否是简单对象（数字、字符串等对象）
+		 * @param value
+		 * @return 
+		 * 
+		 */		
+		static public function checkSimpleObject(value:Object):Boolean
+		{
+			var simple:Boolean = true;
+			for (var k:* in value)
+			{
+				simple = false;
+				break;
+			}
+			return simple;
+		}
+		
 		private static var _tf:TextField = new TextField();
 		
 		/**获得实际文本*/

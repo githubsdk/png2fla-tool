@@ -419,7 +419,7 @@ package
 			}
 			
 			check();	
-			return;
+			//return;
 			time(true, "找出所有文件并保存");
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
 			for each(var folder_files_dic:Dictionary in _filesInFolder.filesInFolder)
@@ -442,7 +442,7 @@ package
 		private function check():void
 		{
 			var fc:DOLFormularChecker = new DOLFormularChecker();
-			var log:Object = fc.execute(_filesInFolder.filesInFolder);
+			var log:Object = fc.execute(_filesInFolder.filesInFolder, _allImportConfigs);
 			if(log!=null)
 			{
 				for (var key:* in _configLog)
@@ -486,9 +486,9 @@ package
 			var file:File = _workingPath.parent;
 			var content:String = "";
 			var jsons:Array = new Array();
-			for (var char_folder:String in _filesInFolder.filesInRootFolder)
+			for (var char_folder:String in _filesInFolder.filesInFolder)
 			{
-				var json:Object = generateSaveContent(char_folder, getFullPath(_workingPath.resolvePath(char_folder).url) );
+				var json:Object = generateSaveContent(char_folder/*, getFullPath(_workingPath.resolvePath(char_folder).url) */);
 				if(json==null)
 					continue;
 				jsons.push(json);
@@ -572,7 +572,7 @@ package
 				_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoaderHandler);
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
-				var cfg:Object = _allImportConfigs[child.rootName];
+				var cfg:Object = _allImportConfigs[child.sRootName];
 				var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
 				var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
 				executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
@@ -609,14 +609,11 @@ package
 			_bmp.y = fd.shiftY;
 
 			//保存处理过的图像
-			var save_path:String = getSavePath(fd.nativePath, false, fd.rootName);
+			var save_path:String = getSavePath(fd.nativePath, false, fd.sRootName);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
 			ba = null;
-			
-			//图像偏移量加入字符串
-			var fullpath:String = fd.fullPath;
 			
 			//预览
 			if(_panel.uiloader.contains(_bmp)==true)
@@ -637,9 +634,9 @@ package
 		 * @return 
 		 * 
 		 */		
-		protected function generateSaveContent(rootName:String, charFullPath:String):Object
+		protected function generateSaveContent(rootName:String/*, charFullPath:String*/):Object
 		{
-			var folder_files_dic:Dictionary = _filesInFolder.filesInFolder[charFullPath];
+			var folder_files_dic:Dictionary = _filesInFolder.filesInFolder[rootName];
 			var DQM:String = '"';
 			var first_up:String = rootName;
 			var json:Object = _allImportConfigs[rootName];
@@ -679,9 +676,9 @@ package
 				var folders_names_list:Array = fullname.split("/");
 				
 				//方向
-				var direction_name:String = folders_names_list[2];
+				var direction_name:String = folders_names_list[1];
 				//文件夹名称，比如 walk far near 以及用技能id命名的
-				var action_name:String = folders_names_list[1];
+				var action_name:String = folders_names_list[0];
 				//除根目录以外的文件夹全路径
 				var keyname:String = action_name;
 				if(direction_name!=null)
@@ -718,7 +715,7 @@ package
 						if(fd.sName.indexOf(fire_poin_file)>=0)
 							fire_poin_frame = file_index+1;
 					}
-					infos.push([fd.sName,getSavePath(fd.url,true, fd.rootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+					infos.push([fd.sName,getSavePath(fd.url,true, fd.sRootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				if(fire_poin_file!=null && fire_poin_frame==1)
 					log( fullname + " 没有找到 firepointfile = "+fire_poin_file+"的文件，请检查 ", "ff0000");

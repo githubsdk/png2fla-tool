@@ -17,7 +17,7 @@ package dol
 			_formular = DOLFormular.ins.formular;
 		}
 		
-		public function execute(list:Dictionary, clearLog:Boolean=true):*
+		public function execute(list:Dictionary, publishConfigs:Dictionary, clearLog:Boolean=true):*
 		{
 			if(clearLog==true)
 				_log = null;
@@ -49,6 +49,8 @@ package dol
 							continue;
 						}else{
 							actions[action_name] = true;
+							//if(publishConfigs[root_name]!=null)
+								//publishConfigCheck(publishConfigs[root_name].labels[action_name]);
 						}
 					}
 					
@@ -73,6 +75,59 @@ package dol
 			if(_log!=null)
 				Debugger.log(JSON.stringify(_log, null, 4));
 			return _log;
+		}
+		
+		/**
+		 *用当前 actionName 去检索有没有对应的规则，如果有规则，则检查该规则的内容
+		 * @param actionName
+		 * @param folderConfig
+		 * 
+		 */		
+		private function publishConfigCheck(folderConfig:Object):void
+		{
+			if(folderConfig==null)
+				return;
+			var config_details:Object = folderConfig.charfolder;
+			var rules_config:Object = _formular.getData("config_rules");
+			
+			var errors:Array ;
+			errors = configValueCheck(rules_config, config_details, _formular.getData("actions"));
+			var s:String = JSON.stringify(errors, null, 4);
+			Debugger.log(s);
+		}
+		
+		private function configValueCheck(source:Object, config:Object, keyReplacement:Object=null, simpleCheck:Boolean=true):Array
+		{
+			var errors:Array;
+			if(config==null)
+				return errors;
+			for (var key:* in source)
+			{
+				errors ||= new Array();
+				var value:* = source[key];
+				var key_replaced:* = key;
+				if(keyReplacement!=null && keyReplacement[key]!=null)
+				{
+					//key值可被替换成别的内容，用被替换过的key来索引 config 里的数据
+					key_replaced = keyReplacement[key];
+				}
+				var key_reg:RegExp = new RegExp(key_replaced);
+				var key_exec:Array = key_reg.exec();
+				//只检查简单对象
+				if(ObjectUtils.checkSimpleObject(value)==true)
+				{
+					if(config[key]==null || config[key]==source[key])
+					{
+						errors.push(source[key]);
+					}
+				}else if(simpleCheck==true)
+				{
+					errors ||= new Array();
+					errors = errors.concat( configValueCheck(source[key], config[key], keyReplacement, simpleCheck) );
+				}
+			}
+			
+			return errors;
 		}
 		
 		protected function updateLost(key:String, value:*):void
@@ -153,7 +208,7 @@ package dol
 		{
 			var action_name:String;
 			var dir_name:String;
-			var find_path:String;
+			var find_path:Array;
 			
 			var find_action:String;
 			var actions:Object = rules.actions;
