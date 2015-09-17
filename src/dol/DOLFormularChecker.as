@@ -12,6 +12,7 @@ package dol
 	{
 		protected var _formular:AppConfig;
 		protected var _log:Object;
+		protected var _actionsLog:Object;
 		public function DOLFormularChecker()
 		{
 			_formular = DOLFormular.ins.formular;
@@ -20,7 +21,9 @@ package dol
 		public function execute(list:Dictionary, publishConfigs:Dictionary, clearLog:Boolean=true):*
 		{
 			if(clearLog==true)
+			{
 				_log = null;
+			}
 			
 			var folder_name_cant_match_anyone_in_rule:String = _formular.getData("folder_name_cant_match_anyone_in_rule");
 			var can_find_action_in_publish_config:String =  _formular.getData("can_find_action_in_publish_config");
@@ -33,6 +36,7 @@ package dol
 			{
 				var rules:Object = checkRootNameValid(root_name);
 				var errors:Array;
+				_actionsLog = new Object();
 				
 				var publish_config:Object = publishConfigs[root_name];
 				if(publish_config==null)
@@ -71,7 +75,7 @@ package dol
 								var action_config_data:Object = publish_config.charfolder.labels[ check_result[1] ];
 								if(action_config_data!=null)
 								{
-									var error_obj:Object = actionDefaultValueCheck(check_result[1], check_result[2], action_config_data);
+									var error_obj:Object = actionDefaultValueCheck(root_name, check_result[1], check_result[2], action_config_data);
 									if(error_obj!=null)
 									{
 										updateLost(root_name, default_value, error_obj);
@@ -105,20 +109,18 @@ package dol
 			return _log;
 		}
 		
-		private function actionDefaultValueCheck(actionName:String, actionIndex:* , folderConfig:Object):Object
+		private function actionDefaultValueCheck(rootName:String,actionName:String, actionIndex:* , folderConfig:Object):Object
 		{
 			if(folderConfig==null)
-				return null;
+				return _actionsLog;
 			var rules_config:Object = _formular.getData("config_rules");
 			var errors:Array ;
 			errors = configValueCheck(rules_config.labels[actionIndex], folderConfig);
 			if(errors!=null)
 			{
-				var e:Object = new Object();
-				e[actionName] = errors;
-				return e;
+				_actionsLog[actionName] = errors;
 			}
-			return null;
+			return _actionsLog;
 		}
 		
 		private function configValueCheck(source:Object, config:Object, simpleCheck:Boolean=true):Array
@@ -159,7 +161,8 @@ package dol
 			var errors:Array = key_data[type];
 			if(errors==null)
 				errors = key_data[type] = new Array();
-			errors.push(value);
+			if(errors.indexOf(value)<0)
+				errors.push(value);
 		}
 		
 		private function getRuleActions(rules:Object):Dictionary

@@ -454,10 +454,10 @@ package
 			var log:Object = fc.execute(_filesInFolder.filesInFolder, _allImportConfigs);
 			if(log!=null)
 			{
-				for (var key:* in _configLog)
+				/*for (var key:* in _configLog)
 				{
 					ObjectUtils.merge(log[key], _configLog[key]);
-				}
+				}*/
 				var date:Date = new Date();
 				var path:String = "[log]"+date.getFullYear()+"-" + date.month + "-"+date.date+"-"+date.hours+"-"+date.minutes+"-"+date.seconds + ".txt";
 				saveContent( _workingPath.resolvePath(path), JSON.stringify(log, null, 4));
