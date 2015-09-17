@@ -20,11 +20,4 @@
 		<nature>com.adobe.flexbuilder.project.apollonature</nature>
 		<nature>com.adobe.flexbuilder.project.actionscriptnature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>[source path] org</name>
-			<type>2</type>
-			<location>/Users/Vector/work_shinezone/AppLib/org</location>
-		</link>
-	</linkedResources>
 </projectDescription>
