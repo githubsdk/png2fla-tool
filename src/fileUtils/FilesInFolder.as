@@ -6,14 +6,21 @@ package fileUtils
 	public class FilesInFolder
 	{
 		protected var _filesInFolder:Dictionary;
+		protected var _filesInRoot:Dictionary;
 		protected var _filesList:Vector.<FileData>;
 		
 		public function FilesInFolder()
 		{
 			_filesInFolder = new Dictionary();
+			_filesInRoot = new Dictionary();
 			_filesList = new Vector.<FileData>;
 		}
 		
+		public function get filesInRoot():Dictionary
+		{
+			return _filesInRoot;
+		}
+
 		public function init(children:Array, extensions:Array, root:File):void
 		{
 			if(_filesList!=null)
@@ -55,6 +62,13 @@ package fileUtils
 					if(vec==null)
 						folder_file_dic[fd.folderPath] = vec = new Vector.<PngFileData>;
 					vec.push(fd);
+					
+					var file_in_root:Vector.<PngFileData> = _filesInRoot[root.name];
+					if(file_in_root==null)
+					{
+						_filesInRoot[root.name] = file_in_root = new Vector.<PngFileData>();
+					}
+					file_in_root.push(fd);
 				}
 			}
 			findAllImages(children,extensions, saveList,root);

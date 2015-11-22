@@ -9,6 +9,7 @@ package fileUtils
 		protected var _nativePath:String;
 		protected var _sRootName:String;
 		protected var _folderPath:String;
+		protected var _fullPath:String;
 		
 		public function FileData(file:File=null, root:File=null)
 		{
@@ -20,11 +21,16 @@ package fileUtils
 				
 				_folderPath = _url.replace("/"+file.name,"");
 				_folderPath = _folderPath.replace(root.url+"/","");
-				
+				_fullPath =  root.name+"/" +_url.replace(root.url+"/","");
 				_sRootName = root.name;
 			}
 		}
 		
+		public function get fullPath():String
+		{
+			return _fullPath;
+		}
+
 		public function get url():String
 		{
 			return _url;

@@ -301,7 +301,7 @@ package
 				}
 				case _panel.jsfl:
 				{
-					copyAndRunTempleteFileAndJSFL();
+					//copyAndRunTempleteFileAndJSFL();
 					break;
 				}
 				case _panel.start:
@@ -430,22 +430,37 @@ package
 			
 			check();	
 			time(true, "找出所有文件并保存");
+
+			var fileslist:Array = [];
+			var rootname:Array = [];
 			//排序文件，对于保存配置来说顺序很重要，因为要按照文件名从小到大的顺序添加到fla的时间轴
-			for each(var folder_files_dic:Dictionary in _filesInFolder.filesInFolder)
+			for (var charName:String in _filesInFolder.filesInRoot)
 			{
-				for each(var vec:Vector.<PngFileData> in folder_files_dic)
-				{
-					vec = vec.sort(fileDataSort);
-					_allFoundFilesVec = _allFoundFilesVec.concat(vec);
-				}
+				rootname.push(charName);
+				fileslist.push(_filesInFolder.filesInRoot[charName].concat());
 			}
-			time(true, "排序文件");
+			executeByChar(fileslist, rootname);
 			log("本次处理文件数："+_allFoundFilesVec.length);
 			extentions = null;
 			//组个处理图像并保存
-			executeAllImage(_allFoundFilesVec.reverse(), onAllImagesDone);
+			
 			time(true, "处理图像");
 			return;
+		}
+		
+		private function executeByChar(files:Array,roots:Array):void
+		{
+			if(files!=null && files.length==0)
+			{
+				return;
+			}
+			executeAllImage(files.pop(), onDone, null);
+			function onDone(...args):void
+			{
+				var path:String = getSavePath(_workingPath.resolvePath(roots.pop() + "/uv.json").nativePath, false);
+				saveContent(new File(path), JSON.stringify(args[0], null, 4));
+				executeByChar(files, roots);
+			}
 		}
 		
 		private function check():void
@@ -513,7 +528,7 @@ package
 				_bmp.bitmapData.dispose();
 			}
 			_panel.uiloader.graphics.clear();
-			
+			return;
 			copyAndRunTempleteFileAndJSFL();
 			return;
 		}
@@ -563,12 +578,16 @@ package
 		 * @param onDone
 		 * 
 		 */		
-		protected function executeAllImage(images:Vector.<PngFileData>, onDone:Function):void
+		protected function executeAllImage(images:Vector.<PngFileData>, onDone:Function, params:Object):void
 		{
+			if(params==null)
+			{
+				params = new Object();
+			}
 			if(images==null || images.length==0)
 			{
 				if(onDone!=null)
-					onDone.apply(null, null);
+					onDone.apply(null, [params]);
 				return;
 			}
 			_panel.filecount.text = images.length.toString();
@@ -584,10 +603,11 @@ package
 				var cfg:Object = _allImportConfigs[child.sRootName];
 				var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
 				var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
-				executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
+				var uv:Point = executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
+				params[child.fullPath] = {x:uv.x, y:uv.y};
 				_loader.unloadAndStop(true);
 				_loader.unload();
-				executeAllImage(images, onDone);
+				executeAllImage(images, onDone, params);
 			}
 		}
 		
@@ -599,10 +619,11 @@ package
 		 * @param shiftY
 		 * 
 		 */		
-		protected function executeImageAndSave(source:BitmapData, fd:PngFileData, shiftX:Number, shiftY:Number):void
+		protected function executeImageAndSave(source:BitmapData, fd:PngFileData, shiftX:Number, shiftY:Number):Point
 		{
+			var uv:Point = new Point();
 			if(source==null)
-				return;
+				return uv;
 			var rect:Rectangle = getBitmapDataValidRect(source);
 			//这里虽然保存了偏移坐标，但只是一个预览用的
 			fd.shiftX =  rect.x-shiftX;
@@ -616,9 +637,15 @@ package
 			_bmp.bitmapData = dest;
 			_bmp.x = fd.shiftX;
 			_bmp.y = fd.shiftY;
+			uv.x = ( shiftX - rect.x ) / rect.width;
+			uv.y = 1 - ( shiftY - rect.y) / rect.height;
+			uv.x = uv.x < 0 ? 0 : uv.x;
+			uv.x = uv.x > 1 ? 1 : uv.x;
+			uv.y = uv.y<0 ? 0 : uv.y;
+			uv.y = uv.y>1 ? 1 : uv.y;
 
 			//保存处理过的图像
-			var save_path:String = getSavePath(fd.nativePath, false, fd.sRootName);
+			var save_path:String = getSavePath(fd.nativePath, false);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
@@ -634,6 +661,8 @@ package
 			_panel.uiloader.graphics.beginFill(0, 0.2);
 			_panel.uiloader.graphics.drawRect(fd.shiftX, fd.shiftY, rect.width, rect.height);
 			_panel.uiloader.graphics.endFill();
+			
+			return uv;
 		}
 		
 		/**
@@ -928,6 +957,7 @@ package
 			{
 				_panel.jsfl.enabled = true;
 			}
+			_panel.jsfl.enabled = false;
 			
 		}
 	
