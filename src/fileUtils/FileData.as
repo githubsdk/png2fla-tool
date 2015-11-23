@@ -21,7 +21,7 @@ package fileUtils
 				
 				_folderPath = _url.replace("/"+file.name,"");
 				_folderPath = _folderPath.replace(root.url+"/","");
-				_fullPath =  root.name+"/" +_url.replace(root.url+"/","");
+				_fullPath = _url.replace(root.url+"/","");
 				_sRootName = root.name;
 			}
 		}

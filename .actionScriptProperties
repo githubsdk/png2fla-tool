@@ -47,7 +47,7 @@
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="F:/foozuu_works/png2fla-tool/shinezone.p12" airTimestamp="true" anePathSet="true" version="1">
+      <airSettings airCertificatePath="E:/foozuu/png2fla-tool/shinezone.p12" airTimestamp="true" anePathSet="true" version="1">
         <airExcludes/>
         <anePaths/>
         <newLaunchParams/>

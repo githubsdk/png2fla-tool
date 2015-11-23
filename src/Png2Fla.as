@@ -457,7 +457,7 @@ package
 			executeAllImage(files.pop(), onDone, null);
 			function onDone(...args):void
 			{
-				var path:String = getSavePath(_workingPath.resolvePath(roots.pop() + "/uv.json").nativePath, false);
+				var path:String = getSavePath(roots.pop() + "/uv.json", false);
 				saveContent(new File(path), JSON.stringify(args[0], null, 4));
 				executeByChar(files, roots);
 			}
@@ -476,7 +476,7 @@ package
 				var date:Date = new Date();
 				var path:String = "[log]"+date.getFullYear()+"-" + date.month + "-"+date.date+"-"+date.hours+"-"+date.minutes+"-"+date.seconds + ".txt";
 				saveContent( _workingPath.resolvePath(path), JSON.stringify(log, null, 4));
-				_workingPath.resolvePath(path).openWithDefaultApplication();
+				//_workingPath.resolvePath(path).openWithDefaultApplication();
 			}
 		}
 		
@@ -556,12 +556,14 @@ package
 		 */		
 		protected function getSavePath(path:String, url:Boolean=false, addName:String=null):String
 		{
-			var save_path:String = path;
+			var save_path:String = null;
 			var replace:String = addName==null ? IMAGE_SAVED_FOLDER : IMAGE_SAVED_FOLDER+"/"+addName;
+			var save_file:File = _workingPath.parent.resolvePath(replace);
+			save_file = save_file.resolvePath(path);
 			if(url==false)
-				save_path = save_path.replace(_workingPath.name, replace);
+				save_path = save_file.nativePath;
 			else
-				save_path = save_path.replace(_workingPath.name, replace);
+				save_path = save_file.url;
 			return save_path;
 		}
 		
@@ -601,9 +603,9 @@ package
 				var bmp:Bitmap = _loader.content as Bitmap;
 				
 				var cfg:Object = _allImportConfigs[child.sRootName];
-				var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
-				var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
-				var uv:Point = executeImageAndSave(bmp.bitmapData, child, shift_x, shift_y);
+				//var shift_x:Number = getCfgValue("x",child.actionName, child.dirName, cfg);
+				//var shift_y:Number = getCfgValue("y",child.actionName, child.dirName, cfg);
+				var uv:Point = executeImageAndSave(bmp.bitmapData, child, bmp.bitmapData.width/2, bmp.bitmapData.height/2);
 				params[child.fullPath] = {x:uv.x, y:uv.y};
 				_loader.unloadAndStop(true);
 				_loader.unload();
@@ -645,7 +647,7 @@ package
 			uv.y = uv.y>1 ? 1 : uv.y;
 
 			//保存处理过的图像
-			var save_path:String = getSavePath(fd.nativePath, false);
+			var save_path:String = getSavePath(fd.sRootName + "/" + fd.fullPath, false);
 			var ba:ByteArray = new ByteArray();
 			dest.encode(dest.rect,new PNGEncoderOptions(false),ba);
 			saveContent(new File(save_path), ba, true);
@@ -753,7 +755,7 @@ package
 						if(fd.sName.indexOf(fire_poin_file)>=0)
 							fire_poin_frame = file_index+1;
 					}
-					infos.push([fd.sName,getSavePath(fd.url,true, fd.sRootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
+					infos.push([fd.sName,getSavePath(fd.sRootName+"/"+fd.fullPath,true, fd.sRootName),fd.shiftX.toFixed(1),fd.shiftY.toFixed(1)]);
 				}
 				if(fire_poin_file!=null && fire_poin_frame==1)
 					log( fullname + " 没有找到 firepointfile = "+fire_poin_file+"的文件，请检查 ", "ff0000");
